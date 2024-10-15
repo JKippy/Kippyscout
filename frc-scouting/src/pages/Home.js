@@ -1,13 +1,10 @@
 import React from 'react';
-import LoginButton from '../components/LoginButton';
-import LogoutButton from '../components/LogoutButton';
+import Header from '../components/Header'; // Ensure this is the correct import
 import { useAuth0 } from '@auth0/auth0-react';
+import '../App.css'; // Ensure the CSS is imported
 
 const Home = () => {
   const { isAuthenticated, isLoading } = useAuth0();
-
-  console.log("isLoading:", isLoading); // Debug line
-  console.log("isAuthenticated:", isAuthenticated); // Debug line
 
   if (isLoading) {
     return <div>Loading...</div>;
@@ -15,15 +12,15 @@ const Home = () => {
 
   return (
     <div>
-      <h1>Welcome to the FRC Scouting App</h1>
-      {isAuthenticated ? (
-        <>
+      <Header /> {/* Use the Header component with sidebar */}
+      <div className="main-content">
+        <h2>Welcome to Kippyscout!</h2>
+        {isAuthenticated ? (
           <p>You are logged in!</p>
-          <LogoutButton />
-        </>
-      ) : (
-        <LoginButton />
-      )}
+        ) : (
+          <p>Please log in to access the scouting features.</p>
+        )}
+      </div>
     </div>
   );
 };
