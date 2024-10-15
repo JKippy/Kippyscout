@@ -1,0 +1,54 @@
+.sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 250px; /* Sidebar width */
+  background-color: #ff6a00; /* Orange */
+  color: white;
+  transition: width 0.3s;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.sidebar.closed {
+  width: 60px; /* Collapsed width */
+}
+
+.toggle-button {
+  background-color: transparent; /* Make the button transparent */
+  border: none; /* Remove default button border */
+  cursor: pointer;
+  margin-bottom: 10px;
+}
+
+.toggle-button img {
+  width: 30px; /* Adjust icon size */
+  height: auto; /* Maintain aspect ratio */
+}
+
+.nav-menu {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  transition: background 0.3s;
+}
+
+.nav-menu a:hover {
+  background: rgba(255, 255, 255, 0.2); /* Lighten on hover */
+}
+
+.auth-buttons {
+  margin-top: auto; /* Pushes buttons to the bottom */
+  display: flex;
+  gap: 10px;
+}
+
