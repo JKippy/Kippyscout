@@ -1,4 +1,4 @@
-//VufeTmhUA3Ue-qtT
+//+
 
 const express = require('express');
 const mongoose = require('mongoose');
@@ -7,11 +7,14 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+const cors = require('cors'); // Import cors
+
 // MongoDB connection URI
-const uri = 'mongodb+srv://kaipjason:VufeTmhUA3Ue-qtT@kippyscout.yvu1n.mongodb.net/?retryWrites=true&w=majority&appName=Kippyscout';
+const uri = 'mongodb+srv://jasonkippy:scouting1@kippyscout.yvu1n.mongodb.net/?retryWrites=true&w=majority&appName=Kippyscout';
 
 // Middleware
-app.use(bodyParser.json());
+app.use(cors()); // Enable CORS
+app.use(express.json()); // For parsing application/json
 
 // Connect to MongoDB
 mongoose.connect(uri)
