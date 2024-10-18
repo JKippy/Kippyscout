@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { useAuth0 } from '@auth0/auth0-react'; // Import Auth0 hook
 import Header from '../components/Header'; // Import the Header component
 import './Scouting.css'; // Import your CSS file
 
 const Scouting = () => {
+  const { isAuthenticated, loginWithRedirect } = useAuth0(); // Destructure necessary methods
   const [matchData, setMatchData] = useState({
     scouterName: '',
     teamNumber: '',
@@ -14,6 +16,12 @@ const Scouting = () => {
     endgameStatus: '',
     notes: '',
   });
+
+  // If not authenticated, redirect to login
+  if (!isAuthenticated) {
+    loginWithRedirect();
+    return null; // Prevent rendering the page while redirecting
+  }
 
   const handleChange = (e) => {
     setMatchData({ ...matchData, [e.target.name]: e.target.value });
