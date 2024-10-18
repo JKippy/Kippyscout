@@ -4,8 +4,14 @@ import './Scouting.css'; // Import your CSS file
 
 const Scouting = () => {
   const [matchData, setMatchData] = useState({
+    scouterName: '',
     teamNumber: '',
     matchNumber: '',
+    autoHighGoals: '',
+    autoLowGoals: '',
+    teleHighGoals: '',
+    teleLowGoals: '',
+    endgameStatus: '',
     notes: '',
   });
 
@@ -13,10 +19,40 @@ const Scouting = () => {
     setMatchData({ ...matchData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     console.log('Match data submitted:', matchData);
-    // Add code to save match data to Firestore
+    
+    try {
+      const response = await fetch('http://localhost:5000/api/matchdata', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(matchData),
+      });
+
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+
+      const data = await response.json();
+      console.log('Data saved successfully:', data);
+      // Reset form or provide success message
+      setMatchData({
+        scouterName: '',
+        teamNumber: '',
+        matchNumber: '',
+        autoHighGoals: '',
+        autoLowGoals: '',
+        teleHighGoals: '',
+        teleLowGoals: '',
+        endgameStatus: '',
+        notes: '',
+      });
+    } catch (error) {
+      console.error('Error saving match data:', error);
+    }
   };
 
   return (
@@ -25,40 +61,99 @@ const Scouting = () => {
       <div className="main-content">
         <h2>Scouting Page</h2>
         <p>Here you can enter match scouting data.</p>
-        {<div className="scouting-container">
-      <form onSubmit={handleSubmit} className="scouting-form">
-        <div className="form-group">
-          <label>Team Number:</label>
-          <input
-            type="text"
-            name="teamNumber"
-            value={matchData.teamNumber}
-            onChange={handleChange}
-            required
-          />
+        <div className="scouting-container">
+          <form onSubmit={handleSubmit} className="scouting-form">
+            <div className="form-group">
+              <label>Scouter Name:</label>
+              <input
+                type="text"
+                name="scouterName"
+                value={matchData.scouterName}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Team Number:</label>
+              <input
+                type="text"
+                name="teamNumber"
+                value={matchData.teamNumber}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Match Number:</label>
+              <input
+                type="text"
+                name="matchNumber"
+                value={matchData.matchNumber}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Auto High Goals:</label>
+              <input
+                type="number"
+                name="autoHighGoals"
+                value={matchData.autoHighGoals}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Auto Low Goals:</label>
+              <input
+                type="number"
+                name="autoLowGoals"
+                value={matchData.autoLowGoals}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Tele High Goals:</label>
+              <input
+                type="number"
+                name="teleHighGoals"
+                value={matchData.teleHighGoals}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Tele Low Goals:</label>
+              <input
+                type="number"
+                name="teleLowGoals"
+                value={matchData.teleLowGoals}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Endgame Status:</label>
+              <input
+                type="text"
+                name="endgameStatus"
+                value={matchData.endgameStatus}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="form-group">
+              <label>Notes:</label>
+              <textarea
+                name="notes"
+                value={matchData.notes}
+                onChange={handleChange}
+              />
+            </div>
+            <button type="submit" className="submit-button">Submit Match Data</button>
+          </form>
         </div>
-        <div className="form-group">
-          <label>Match Number:</label>
-          <input
-            type="text"
-            name="matchNumber"
-            value={matchData.matchNumber}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Notes:</label>
-          <textarea
-            name="notes"
-            value={matchData.notes}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <button type="submit" className="submit-button">Submit Match Data</button>
-      </form>
-    </div>}
       </div>
     </div>
   );
