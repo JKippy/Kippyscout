@@ -1,0 +1,43 @@
+.scouting-container {
+  max-width: 800px;
+  margin: 20px auto;
+  padding: 20px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background-color: #f9f9f9;
+}
+
+.alliance-section {
+  margin-top: 20px; /* Space between sections */
+}
+
+.alliance-container {
+  margin: 10px 0;
+  padding: 15px;
+  border-radius: 8px;
+}
+
+.red-alliance {
+  background-color: rgba(255, 0, 0, 0.1); /* Light red tint */
+}
+
+.blue-alliance {
+  background-color: rgba(0, 0, 255, 0.1); /* Light blue tint */
+}
+
+.robots-container {
+  display: flex;
+  justify-content: space-around; /* Distribute teams horizontally */
+  flex-wrap: wrap; /* Allow wrapping if space is insufficient */
+}
+
+.robot-card {
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 10px;
+  margin: 5px;
+  flex: 1 1 calc(30% - 10px); /* Adjust size of each card */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+

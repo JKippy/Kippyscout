@@ -22,6 +22,7 @@ const Header = () => {
             <Link to="/">Home</Link>
             <Link to="/scouting">Scouting</Link>
             <Link to="/matches">Matches</Link>
+            <Link to="/dashboard">Drive Team Dashboard</Link>
             <Link to="/about">About</Link>
           </nav>
           <div className="auth-buttons">
