@@ -1,6 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth0 } from '@auth0/auth0-react'; // Import Auth0 hook
 import Header from '../components/Header'; // Import the Header component
+import { ref, set } from 'firebase/database'; // Import Firebase Database methods
+import { database } from '../firebase'; // Import your Firebase configuration
 import './Scouting.css'; // Import your CSS file
 
 const Scouting = () => {
@@ -32,20 +34,11 @@ const Scouting = () => {
     console.log('Match data submitted:', matchData);
     
     try {
-      const response = await fetch('http://localhost:5000/api/matchdata', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(matchData),
-      });
+      // Generate a unique key for each match data entry
+      const matchRef = ref(database, 'matchData/' + Date.now());
+      await set(matchRef, matchData);
 
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
-      }
-
-      const data = await response.json();
-      console.log('Data saved successfully:', data);
+      console.log('Data saved successfully:', matchData);
       // Reset form or provide success message
       setMatchData({
         scouterName: '',
