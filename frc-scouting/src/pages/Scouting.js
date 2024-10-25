@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth0 } from '@auth0/auth0-react'; // Import Auth0 hook
 import Header from '../components/Header'; // Import the Header component
-import { ref, set } from 'firebase/database'; // Import Firebase Database methods
-import { database } from '../firebase'; // Import your Firebase configuration
+import { collection, addDoc } from 'firebase/firestore'; // Import Firestore methods
+import { db } from '../firebase'; // Import your Firebase configuration
 import './Scouting.css'; // Import your CSS file
 
 const Scouting = () => {
@@ -34,9 +34,9 @@ const Scouting = () => {
     console.log('Match data submitted:', matchData);
     
     try {
-      // Generate a unique key for each match data entry
-      const matchRef = ref(database, 'matchData/' + Date.now());
-      await set(matchRef, matchData);
+      // Reference to your Firestore collection
+      const matchRef = collection(db, 'matchData');
+      await addDoc(matchRef, matchData); // Use addDoc to add data
 
       console.log('Data saved successfully:', matchData);
       // Reset form or provide success message

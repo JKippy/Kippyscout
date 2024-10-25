@@ -4,9 +4,9 @@ import './Scouting.css'; // Keep your existing CSS
 
 const Dashboard = () => {
   const [eventCode, setEventCode] = useState('');
-  const [matchNumbers, setMatchNumbers] = useState([]);
+  const [matchNumbers] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState(null);
-  const [robotsData, setRobotsData] = useState([]);
+  const [robotsData] = useState([]);
 
   // Placeholder data for teams
   const placeholderRobotsData = [
