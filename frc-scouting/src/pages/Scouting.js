@@ -1,13 +1,14 @@
 import React, { useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react'; // Import Auth0 hook
-import Header from '../components/Header'; // Import the Header component
-import { collection, addDoc } from 'firebase/firestore'; // Import Firestore methods
-import { db } from '../firebase'; // Import your Firebase configuration
-import './Scouting.css'; // Import your CSS file
+import { useAuth0 } from '@auth0/auth0-react';
+import Header from '../components/Header';
+import { collection, addDoc } from 'firebase/firestore';
+import { db } from '../firebase';
+import './Scouting.css';
 
 const Scouting = () => {
-  const { isAuthenticated, loginWithRedirect } = useAuth0(); // Destructure necessary methods
+  const { isAuthenticated, loginWithRedirect } = useAuth0();
   const [matchData, setMatchData] = useState({
+    eventCode: '', // Add event code to matchData
     scouterName: '',
     teamNumber: '',
     matchNumber: '',
@@ -19,10 +20,9 @@ const Scouting = () => {
     notes: '',
   });
 
-  // If not authenticated, redirect to login
   if (!isAuthenticated) {
     loginWithRedirect();
-    return null; // Prevent rendering the page while redirecting
+    return null;
   }
 
   const handleChange = (e) => {
@@ -34,13 +34,14 @@ const Scouting = () => {
     console.log('Match data submitted:', matchData);
     
     try {
-      // Reference to your Firestore collection
-      const matchRef = collection(db, 'matchData');
+      // Reference to your Firestore collection using the event code
+      const matchRef = collection(db, matchData.eventCode);
       await addDoc(matchRef, matchData); // Use addDoc to add data
 
       console.log('Data saved successfully:', matchData);
-      // Reset form or provide success message
+      // Reset form
       setMatchData({
+        eventCode: '',
         scouterName: '',
         teamNumber: '',
         matchNumber: '',
@@ -58,12 +59,22 @@ const Scouting = () => {
 
   return (
     <div>
-      <Header /> {/* Use the Header component */}
+      <Header />
       <div className="main-content">
         <h2>Scouting Page</h2>
         <p>Here you can enter match scouting data.</p>
         <div className="scouting-container">
           <form onSubmit={handleSubmit} className="scouting-form">
+            <div className="form-group">
+              <label>Event Code:</label>
+              <input
+                type="text"
+                name="eventCode"
+                value={matchData.eventCode}
+                onChange={handleChange}
+                required
+              />
+            </div>
             <div className="form-group">
               <label>Scouter Name:</label>
               <input
@@ -161,4 +172,3 @@ const Scouting = () => {
 };
 
 export default Scouting;
-
