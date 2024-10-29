@@ -1,6 +1,6 @@
 # Kippyscout
 ## How to set up dev environment in MacOS/Linux:
-1. Download and install the latest version of [Node.js](https://nodejs.org/en/download/prebuilt-installer)
+1. Download and install Node 20 [Node.js](https://nodejs.org/en/download/prebuilt-installer)
 2. Confirm installation of node with `node -v` and `npm -v` in your terminal. You should see the version number of each.
 3. Run this command to be able to start a local version of the website `npm install react-scripts --save`
 4. Optional: Download [VSCode](https://code.visualstudio.com) to easily manage site development. If you don't want to use this, you can just edit files in a text editor.
