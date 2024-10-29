@@ -18,4 +18,7 @@
 
 ## Firebase
 Code should only be built and deployed to the production Firebase project after having been reviewed and merged into the main branch.
-1. To test Firebase features in your own dev environment, run `firebase emulators:start` to start a local server.
+1. To test Firebase features in your own dev environment, run `firebase emulators:start --project everyscout` to start a local server.
+2. If your emulator doesn't work, run `firebase init firestore` to make sure you have Firestore installed on your device.
+3. If you get a Java error, install Java JDK 17.
+4. This emulator will allow you to test the database/auth/storage functions of the app without having to deploy to the production app.
