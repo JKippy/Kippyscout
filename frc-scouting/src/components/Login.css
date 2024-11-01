@@ -4,7 +4,7 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #f0f2f5;
+  background: #f9f9f9;
 }
 
 .login-box {
@@ -16,17 +16,19 @@
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
+.login-header {
+  margin-bottom: 20px;
+}
+
 .login-title {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 10px;
   color: #333;
 }
 
 .login-description {
   font-size: 14px;
   color: #666;
-  margin-bottom: 20px;
 }
 
 .login-error {
@@ -49,7 +51,7 @@
   font-size: 16px;
 }
 
-.login-button, .signup-button {
+.login-button {
   width: 100%;
   padding: 10px;
   background-color: #007bff;
@@ -61,14 +63,36 @@
   transition: background-color 0.3s ease;
 }
 
-.signup-button {
-  background-color: #6c757d;
-}
-
 .login-button:hover {
   background-color: #0056b3;
+}
+
+.login-footer {
+  margin-top: 20px;
+}
+
+.signup-button {
+  background-color: #6c757d;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .signup-button:hover {
   background-color: #5a6268;
 }
+
+.footer-text {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
+}
+
+.link {
+  color: #007bff;
+  cursor: pointer;
+  text-decoration: underline;
+}
+

@@ -4,29 +4,32 @@
   justify-content: center;
   align-items: center;
   height: 100vh;
-  background: #f0f2f5;
+  background: #f9f9f9;
 }
 
 .signup-box {
   background: white;
   padding: 40px;
   max-width: 400px;
+  width: 100%;
   text-align: center;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  border-radius: 5px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+.signup-header {
+  margin-bottom: 20px;
 }
 
 .signup-title {
   font-size: 24px;
   font-weight: bold;
-  margin-bottom: 10px;
   color: #333;
 }
 
 .signup-description {
   font-size: 14px;
   color: #666;
-  margin-bottom: 20px;
 }
 
 .signup-error {
@@ -71,4 +74,18 @@
 
 .signin-button:hover {
   background-color: #5a6268;
+}
+
+.footer-text {
+  margin-top: 10px;
+}
+
+.link {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: underline;
+}
+
+.signup-footer {
+  margin-top: 20px;
 }
