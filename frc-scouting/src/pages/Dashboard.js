@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import Header from '../components/Header'; // Import the Header component
 import './Scouting.css'; // Keep your existing CSS
 
 const Dashboard = () => {
@@ -37,7 +36,6 @@ const Dashboard = () => {
 
   return (
     <div>
-      <Header />
       <div className="main-content">
         <h2>Data Dashboard</h2>
         <div className="scouting-container">

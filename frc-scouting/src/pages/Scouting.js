@@ -3,7 +3,6 @@ import { collection, addDoc } from 'firebase/firestore'; // Import Firestore met
 import { db } from '../firebase'; // Import your Firebase configuration
 import { auth } from '../firebase'; // Import your Firebase Auth configuration
 import { onAuthStateChanged } from 'firebase/auth'; // Import Auth state changed method
-import Header from '../components/Header'; // Import the Header component
 import './Scouting.css'; // Import your CSS file
 
 const Scouting = () => {
@@ -66,7 +65,6 @@ const Scouting = () => {
   if (!isLoggedIn) {
     return (
       <div className="frozen-container">
-        <Header /> {/* Use the Header component */}
         <div className="main-content">
           <h2>Access Denied</h2>
           <p>You need to be logged in to access this page. Please log in.</p>
@@ -77,7 +75,6 @@ const Scouting = () => {
 
   return (
     <div>
-      <Header /> {/* Use the Header component */}
       <div className="main-content">
         <h2>Scouting Page</h2>
         <p>Here you can enter match scouting data.</p>
