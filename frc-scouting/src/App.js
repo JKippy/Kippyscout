@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom'; // Import Navigate for redirection
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Scouting from './pages/Scouting';
-import { SidebarProvider } from './SidebarContext'; // Import the SidebarProvider
+import { SidebarProvider } from './SidebarContext';
 import { authObserver, logOut } from "./authService";
-import SignIn from "./components/SignIn";
+import Login from "./components/Login";
 import SignUp from "./components/SignUp";
+import Header from "./components/Header";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -15,7 +16,13 @@ const App = () => {
     const unsubscribe = authObserver((currentUser) => {
       setUser(currentUser);
     });
-    return () => unsubscribe(); // Cleanup subscription on unmount
+
+    // Only call unsubscribe if it's a function
+    return () => {
+      if (typeof unsubscribe === "function") {
+        unsubscribe();
+      }
+    };
   }, []);
 
   const handleLogout = async () => {
@@ -26,26 +33,17 @@ const App = () => {
   return (
     <SidebarProvider>
       <Router>
+        <Header />
         <div>
           <h1>FRC Event Data</h1>
-          {user ? (
-            <div>
-              <p>Welcome, {user.email}</p>
-              <button onClick={handleLogout}>Log Out</button>
-            </div>
-          ) : (
-            <div>
-              <SignIn />
-              <SignUp />
-            </div>
-          )}
           <Routes>
             <Route path="/" element={<Home />} />
-            {/* Protected Routes */}
-            <Route path="/dashboard" element={user ? <Dashboard /> : <Navigate to="/login" />} />
-            <Route path="/scouting" element={user ? <Scouting /> : <Navigate to="/login" />} />
-            {/* Redirect to login if not authenticated */}
-            <Route path="/login" element={user ? <Navigate to="/dashboard" /> : <SignIn />} />
+            {/* Unrestricted access to Dashboard and Scouting */}
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/scouting" element={<Scouting />} />
+            {/* Conditional route to redirect based on user state */}
+            <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+            <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUp />} />
           </Routes>
         </div>
       </Router>
@@ -54,4 +52,3 @@ const App = () => {
 };
 
 export default App;
-

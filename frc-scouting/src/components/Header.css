@@ -1,47 +1,27 @@
-.sidebar {
-  position: absolute; /* Change to absolute */
+.header {
+  position: fixed; /* Fixes the header at the top */
+  top: 0;
+  left: 0;
+  width: 100%; /* Full width */
   z-index: 10;
   background-color: #ff6a00; /* Orange background */
   color: white;
-  transition: width 0.3s, background-color 0.3s; /* Smooth transitions */
-  padding: 15px; /* More space inside */
-  top: 0;
-  left: 0;
-  height: 100%; /* Full height */
-  width: 250px; /* Sidebar width */
-  overflow: hidden;
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2); /* Subtle shadow for depth */
-}
-
-.sidebar.closed {
-  width: 60px; /* Collapsed width */
-}
-
-.toggle-button {
-  background-color: transparent; /* Make the button transparent */
-  border: none; /* Remove default button border */
-  cursor: pointer;
-  margin-bottom: 20px; /* Added spacing */
-  display: flex;
-  align-items: center; /* Center the icon */
-}
-
-.toggle-button img {
-  width: 30px; /* Adjust icon size */
-  height: auto; /* Maintain aspect ratio */
+  display: flex; /* Use flexbox for alignment */
+  align-items: center; /* Center vertically */
+  padding: 15px; /* Padding inside the header */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Shadow for depth */
 }
 
 .nav-menu {
-  display: flex;
-  flex-direction: column;
-  gap: 15px; /* Increased gap for better spacing */
-  margin-top: 20px;
+  display: flex; /* Horizontal layout */
+  gap: 15px; /* Space between links */
+  margin-right: auto; /* Pushes the auth buttons to the right */
 }
 
 .nav-menu a {
   color: white;
   text-decoration: none;
-  padding: 10px 15px; /* Slightly larger padding */
+  padding: 10px 15px; /* Padding for links */
   border-radius: 4px;
   transition: background 0.3s, transform 0.2s; /* Add scale effect on hover */
 }
@@ -50,25 +30,3 @@
   background: rgba(255, 255, 255, 0.2); /* Lighten on hover */
   transform: scale(1.05); /* Slight zoom effect */
 }
-
-.auth-buttons {
-  margin-top: auto; /* Pushes buttons to the bottom */
-  display: flex;
-  gap: 10px;
-}
-
-.auth-buttons button {
-  background-color: transparent; /* Transparent background */
-  color: white; /* Text color */
-  border: 1px solid white; /* White border */
-  border-radius: 4px; /* Rounded corners */
-  padding: 5px 10px; /* Padding for buttons */
-  cursor: pointer;
-  transition: background 0.3s, transform 0.2s; /* Smooth transitions */
-}
-
-.auth-buttons button:hover {
-  background-color: rgba(255, 255, 255, 0.1); /* Light background on hover */
-  transform: scale(1.05); /* Slight zoom effect */
-}
-

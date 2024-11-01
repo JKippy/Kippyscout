@@ -1,12 +1,12 @@
-import React, { useState } from 'react';
-import { useAuth0 } from '@auth0/auth0-react'; // Import Auth0 hook
-import Header from '../components/Header'; // Import the Header component
+import React, { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore'; // Import Firestore methods
 import { db } from '../firebase'; // Import your Firebase configuration
+import { auth } from '../firebase'; // Import your Firebase Auth configuration
+import { onAuthStateChanged } from 'firebase/auth'; // Import Auth state changed method
+import Header from '../components/Header'; // Import the Header component
 import './Scouting.css'; // Import your CSS file
 
 const Scouting = () => {
-  const { isAuthenticated, loginWithRedirect } = useAuth0(); // Destructure necessary methods
   const [matchData, setMatchData] = useState({
     scouterName: '',
     teamNumber: '',
@@ -18,12 +18,19 @@ const Scouting = () => {
     endgameStatus: '',
     notes: '',
   });
+  const [isLoggedIn, setIsLoggedIn] = useState(false); // State for authentication status
 
-  // If not authenticated, redirect to login
-  if (!isAuthenticated) {
-    loginWithRedirect();
-    return null; // Prevent rendering the page while redirecting
-  }
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setIsLoggedIn(true); // User is logged in
+      } else {
+        setIsLoggedIn(false); // User is logged out
+      }
+    });
+
+    return () => unsubscribe(); // Clean up subscription on unmount
+  }, []);
 
   const handleChange = (e) => {
     setMatchData({ ...matchData, [e.target.name]: e.target.value });
@@ -56,6 +63,18 @@ const Scouting = () => {
     }
   };
 
+  if (!isLoggedIn) {
+    return (
+      <div className="frozen-container">
+        <Header /> {/* Use the Header component */}
+        <div className="main-content">
+          <h2>Access Denied</h2>
+          <p>You need to be logged in to access this page. Please log in.</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div>
       <Header /> {/* Use the Header component */}
@@ -77,7 +96,7 @@ const Scouting = () => {
             <div className="form-group">
               <label>Team Number:</label>
               <input
-                type="text"
+                type="number"
                 name="teamNumber"
                 value={matchData.teamNumber}
                 onChange={handleChange}
@@ -161,4 +180,3 @@ const Scouting = () => {
 };
 
 export default Scouting;
-
