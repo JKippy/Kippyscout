@@ -9,19 +9,24 @@ const Scouting = () => {
     scouterName: '',
     teamNumber: '',
     matchNumber: '',
-    autoHighGoals: '',
-    autoLowGoals: '',
-    teleHighGoals: '',
-    teleLowGoals: '',
+    autoHighGoals: 0,
+    autoLowGoals: 0,
+    teleHighGoals: 0,
+    teleLowGoals: 0,
     endgameStatus: '',
     notes: '',
   });
   const [isLoggedIn, setIsLoggedIn] = useState(false); // State for authentication status
 
+  // Fetch the current user's email
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setIsLoggedIn(true); // User is logged in
+        setMatchData((prevState) => ({
+          ...prevState,
+          scouterName: user.email, // Set the scouter name to the logged-in user's email
+        }));
       } else {
         setIsLoggedIn(false); // User is logged out
       }
@@ -32,6 +37,20 @@ const Scouting = () => {
 
   const handleChange = (e) => {
     setMatchData({ ...matchData, [e.target.name]: e.target.value });
+  };
+
+  const handleIncrement = (field) => {
+    setMatchData((prevState) => ({
+      ...prevState,
+      [field]: prevState[field] + 1,
+    }));
+  };
+
+  const handleDecrement = (field) => {
+    setMatchData((prevState) => ({
+      ...prevState,
+      [field]: prevState[field] > 0 ? prevState[field] - 1 : 0, // Prevent going below 0
+    }));
   };
 
   const handleSubmit = async (e) => {
@@ -46,13 +65,13 @@ const Scouting = () => {
       console.log('Data saved successfully:', matchData);
       // Reset form or provide success message
       setMatchData({
-        scouterName: '',
+        scouterName: matchData.scouterName, // Keep the email in the state
         teamNumber: '',
         matchNumber: '',
-        autoHighGoals: '',
-        autoLowGoals: '',
-        teleHighGoals: '',
-        teleLowGoals: '',
+        autoHighGoals: 0,
+        autoLowGoals: 0,
+        teleHighGoals: 0,
+        teleLowGoals: 0,
         endgameStatus: '',
         notes: '',
       });
@@ -80,12 +99,13 @@ const Scouting = () => {
         <div className="scouting-container">
           <form onSubmit={handleSubmit} className="scouting-form">
             <div className="form-group">
-              <label>Scouter Name:</label>
+              <label>Scouter Name (Email):</label>
               <input
                 type="text"
                 name="scouterName"
                 value={matchData.scouterName}
                 onChange={handleChange}
+                disabled  // Disable the scouter name input so the user can't edit it
                 required
               />
             </div>
@@ -111,43 +131,99 @@ const Scouting = () => {
             </div>
             <div className="form-group">
               <label>Auto High Goals:</label>
-              <input
-                type="number"
-                name="autoHighGoals"
-                value={matchData.autoHighGoals}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-with-buttons">
+                <input
+                  type="number"
+                  name="autoHighGoals"
+                  value={matchData.autoHighGoals}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDecrement('autoHighGoals')}
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleIncrement('autoHighGoals')}
+                >
+                  +
+                </button>
+              </div>
             </div>
             <div className="form-group">
               <label>Auto Low Goals:</label>
-              <input
-                type="number"
-                name="autoLowGoals"
-                value={matchData.autoLowGoals}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-with-buttons">
+                <input
+                  type="number"
+                  name="autoLowGoals"
+                  value={matchData.autoLowGoals}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDecrement('autoLowGoals')}
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleIncrement('autoLowGoals')}
+                >
+                  +
+                </button>
+              </div>
             </div>
             <div className="form-group">
               <label>Tele High Goals:</label>
-              <input
-                type="number"
-                name="teleHighGoals"
-                value={matchData.teleHighGoals}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-with-buttons">
+                <input
+                  type="number"
+                  name="teleHighGoals"
+                  value={matchData.teleHighGoals}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDecrement('teleHighGoals')}
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleIncrement('teleHighGoals')}
+                >
+                  +
+                </button>
+              </div>
             </div>
             <div className="form-group">
               <label>Tele Low Goals:</label>
-              <input
-                type="number"
-                name="teleLowGoals"
-                value={matchData.teleLowGoals}
-                onChange={handleChange}
-                required
-              />
+              <div className="input-with-buttons">
+                <input
+                  type="number"
+                  name="teleLowGoals"
+                  value={matchData.teleLowGoals}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDecrement('teleLowGoals')}
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleIncrement('teleLowGoals')}
+                >
+                  +
+                </button>
+              </div>
             </div>
             <div className="form-group">
               <label>Endgame Status:</label>
@@ -176,3 +252,4 @@ const Scouting = () => {
 };
 
 export default Scouting;
+

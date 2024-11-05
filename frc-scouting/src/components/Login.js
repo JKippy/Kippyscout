@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { getAuth, signInWithEmailAndPassword } from 'firebase/auth';
 import { useNavigate } from 'react-router-dom';
 import './Login.css';
+import logo from '../assets/3316416.png'
 
 const SignIn = () => {
   const [email, setEmail] = useState('');
@@ -30,7 +31,7 @@ const SignIn = () => {
     <div className="login-container">
       <div className="login-box">
         <div className="login-header text-center">
-          <img src="https://cdn.auth0.com/styleguide/1.0.0/img/badge.svg" alt="Logo" width="75" />
+          <img src={logo} style={{ width: '200px', height: 'auto' }}/>
           <h2 className="login-title">Welcome Back</h2>
           <p className="login-description">Please log in to your account.</p>
         </div>
