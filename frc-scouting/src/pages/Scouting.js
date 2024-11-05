@@ -3,7 +3,6 @@ import { collection, addDoc } from 'firebase/firestore'; // Import Firestore met
 import { db } from '../firebase'; // Import your Firebase configuration
 import { auth } from '../firebase'; // Import your Firebase Auth configuration
 import { onAuthStateChanged } from 'firebase/auth'; // Import Auth state changed method
-import './Scouting.css'; // Import your CSS file
 
 const Scouting = () => {
   const [matchData, setMatchData] = useState({

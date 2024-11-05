@@ -9,6 +9,7 @@ import { authObserver } from "./authService";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import Header from "./components/Header";
+import Settings from "./pages/Settings";
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -39,6 +40,7 @@ const App = () => {
             <Route path="/about" element={<About />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUp />} />
+            <Route path="/settings" element={<Settings />} />
           </Routes>
         </div>
       </Router>

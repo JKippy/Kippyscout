@@ -12,6 +12,7 @@ const Header = ({ user }) => {
         <Link to="/matches">Matches</Link>
         <Link to="/dashboard">Drive Team Dashboard</Link>
         <Link to="/about">About</Link>
+        <Link to="/settings">Settings</Link>
 
         {/* Conditional Rendering based on user authentication */}
         {user ? (
