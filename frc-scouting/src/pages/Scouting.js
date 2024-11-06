@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { collection, addDoc } from 'firebase/firestore'; // Import Firestore methods
-import { db } from '../firebase'; // Import your Firebase configuration
-import { auth } from '../firebase'; // Import your Firebase Auth configuration
-import { onAuthStateChanged } from 'firebase/auth'; // Import Auth state changed method
+import { collection, addDoc } from 'firebase/firestore';  // Firestore methods
+import { auth, db } from '../firebase';  // Import Firebase authentication and Firestore instance
+import { onAuthStateChanged } from 'firebase/auth';  // Firebase Auth state change method
 
 const Scouting = () => {
+  const [user, setUser] = useState(null);
+  const [eventCode, setEventCode] = useState('');
   const [matchData, setMatchData] = useState({
     scouterName: '',
     teamNumber: '',
@@ -16,56 +17,66 @@ const Scouting = () => {
     endgameStatus: '',
     notes: '',
   });
-  const [isLoggedIn, setIsLoggedIn] = useState(false); // State for authentication status
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Fetch the current user's email
+  // Check if user is authenticated
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
-      if (user) {
-        setIsLoggedIn(true); // User is logged in
-        setMatchData((prevState) => ({
-          ...prevState,
-          scouterName: user.email, // Set the scouter name to the logged-in user's email
-        }));
-      } else {
-        setIsLoggedIn(false); // User is logged out
-      }
+      setUser(user);
     });
-
-    return () => unsubscribe(); // Clean up subscription on unmount
+    return () => unsubscribe();  // Unsubscribe when component unmounts
   }, []);
 
+  if (!user) {
+    return (
+      <div>
+        <h2>Please log in to submit scouting data.</h2>
+      </div>
+    );
+  }
+
+  // Form handling functions
   const handleChange = (e) => {
-    setMatchData({ ...matchData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    setMatchData((prevData) => ({
+      ...prevData,
+      [name]: value,
+    }));
   };
 
   const handleIncrement = (field) => {
-    setMatchData((prevState) => ({
-      ...prevState,
-      [field]: prevState[field] + 1,
+    setMatchData((prevData) => ({
+      ...prevData,
+      [field]: prevData[field] + 1,
     }));
   };
 
   const handleDecrement = (field) => {
-    setMatchData((prevState) => ({
-      ...prevState,
-      [field]: prevState[field] > 0 ? prevState[field] - 1 : 0, // Prevent going below 0
+    setMatchData((prevData) => ({
+      ...prevData,
+      [field]: prevData[field] > 0 ? prevData[field] - 1 : 0,
     }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('Match data submitted:', matchData);
-    
-    try {
-      // Reference to your Firestore collection
-      const matchRef = collection(db, 'matchData');
-      await addDoc(matchRef, matchData); // Use addDoc to add data
+    setIsSubmitting(true);
 
-      console.log('Data saved successfully:', matchData);
-      // Reset form or provide success message
+    try {
+      // Get reference to Firestore collection using eventCode
+      const matchRef = collection(db, eventCode);  // Firestore collection reference
+
+      // Add the new match data to Firestore
+      await addDoc(matchRef, {
+        ...matchData,
+        scouterName: user.email,  // Use the authenticated user's email as scouter name
+        timestamp: new Date(),    // Add a timestamp for when the data was submitted
+      });
+
+      alert('Data submitted successfully!');
+      setIsSubmitting(false);
       setMatchData({
-        scouterName: matchData.scouterName, // Keep the email in the state
+        scouterName: '',
         teamNumber: '',
         matchNumber: '',
         autoHighGoals: 0,
@@ -76,20 +87,10 @@ const Scouting = () => {
         notes: '',
       });
     } catch (error) {
-      console.error('Error saving match data:', error);
+      alert('Error submitting data: ' + error.message);
+      setIsSubmitting(false);
     }
   };
-
-  if (!isLoggedIn) {
-    return (
-      <div className="frozen-container">
-        <div className="main-content">
-          <h2>Access Denied</h2>
-          <p>You need to be logged in to access this page. Please log in.</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div>
@@ -98,17 +99,33 @@ const Scouting = () => {
         <p>Here you can enter match scouting data.</p>
         <div className="scouting-container">
           <form onSubmit={handleSubmit} className="scouting-form">
+            {/* Event Code Input */}
+            <div className="form-group">
+              <label>Event Code:</label>
+              <input
+                type="text"
+                name="eventCode"
+                value={eventCode}
+                onChange={(e) => setEventCode(e.target.value)} // Update eventCode state
+                placeholder="Enter Event Code"
+                required
+              />
+            </div>
+
+            {/* Scouter Name (Email) */}
             <div className="form-group">
               <label>Scouter Name (Email):</label>
               <input
                 type="text"
                 name="scouterName"
-                value={matchData.scouterName}
+                value={matchData.scouterName || user.email}  // Display user's email as scouter name
                 onChange={handleChange}
                 disabled  // Disable the scouter name input so the user can't edit it
                 required
               />
             </div>
+
+            {/* Team Number */}
             <div className="form-group">
               <label>Team Number:</label>
               <input
@@ -119,6 +136,8 @@ const Scouting = () => {
                 required
               />
             </div>
+
+            {/* Match Number */}
             <div className="form-group">
               <label>Match Number:</label>
               <input
@@ -129,6 +148,8 @@ const Scouting = () => {
                 required
               />
             </div>
+
+            {/* Auto High Goals */}
             <div className="form-group">
               <label>Auto High Goals:</label>
               <div className="input-with-buttons">
@@ -153,6 +174,8 @@ const Scouting = () => {
                 </button>
               </div>
             </div>
+
+            {/* Auto Low Goals */}
             <div className="form-group">
               <label>Auto Low Goals:</label>
               <div className="input-with-buttons">
@@ -177,6 +200,8 @@ const Scouting = () => {
                 </button>
               </div>
             </div>
+
+            {/* Tele High Goals */}
             <div className="form-group">
               <label>Tele High Goals:</label>
               <div className="input-with-buttons">
@@ -201,6 +226,8 @@ const Scouting = () => {
                 </button>
               </div>
             </div>
+
+            {/* Tele Low Goals */}
             <div className="form-group">
               <label>Tele Low Goals:</label>
               <div className="input-with-buttons">
@@ -225,6 +252,8 @@ const Scouting = () => {
                 </button>
               </div>
             </div>
+
+            {/* Endgame Status */}
             <div className="form-group">
               <label>Endgame Status:</label>
               <input
@@ -235,6 +264,8 @@ const Scouting = () => {
                 required
               />
             </div>
+
+            {/* Notes */}
             <div className="form-group">
               <label>Notes:</label>
               <textarea
@@ -243,7 +274,14 @@ const Scouting = () => {
                 onChange={handleChange}
               />
             </div>
-            <button type="submit" className="submit-button">Submit Match Data</button>
+
+            {/* Submit Button */}
+            <button 
+              type="submit" 
+              className="submit-button" 
+              disabled={isSubmitting}>
+              {isSubmitting ? 'Submitting...' : 'Submit Match Data'}
+            </button>
           </form>
         </div>
       </div>
@@ -252,4 +290,3 @@ const Scouting = () => {
 };
 
 export default Scouting;
-
