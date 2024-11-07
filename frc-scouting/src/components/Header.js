@@ -9,7 +9,7 @@ const Header = ({ user }) => {
       <nav className="nav-menu">
         <Link to="/">Home</Link>
         <Link to="/scouting">Scouting</Link>
-        <Link to="/matches">Matches</Link>
+        <Link to="/eventdata">Event Data</Link>
         <Link to="/dashboard">Drive Team Dashboard</Link>
         <Link to="/about">About</Link>
         <Link to="/settings">Settings</Link>

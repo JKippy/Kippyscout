@@ -4,7 +4,7 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import Scouting from './pages/Scouting';
 import About from './pages/About';
-import Matches from './pages/Matches';
+import EventData from './pages/EventData';
 import { authObserver } from "./authService";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
@@ -36,7 +36,7 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/scouting" element={<Scouting />} />
-            <Route path="/matches" element={<Matches />} />
+            <Route path="/eventdata" element={<EventData />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUp />} />

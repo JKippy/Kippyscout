@@ -1,175 +1,192 @@
-import React, { useEffect, useState } from 'react';
-import './Scouting.css'; // Keep your existing CSS
-import { getFirestore, collection, getDocs, query, where } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { db } from '../firebase';  // Firestore instance
+import { collection, query, where, getDocs } from 'firebase/firestore';  // Firestore methods
 
 const Dashboard = () => {
-  const [matchNumbers, setMatchNumbers] = useState([]);
-  const [selectedMatch, setSelectedMatch] = useState(null);
-  const [robotsData, setRobotsData] = useState([]);
+  const storedEventCode = localStorage.getItem('eventCode') || '';  // Fetch eventCode from localStorage
+  const storedMatchNumber = Number(localStorage.getItem('matchNumber')) || 1;  // Fetch matchNumber from localStorage
+
+  const [eventCode, setEventCode] = useState(storedEventCode);  // Set initial eventCode from localStorage
+  const [matchNumber, setMatchNumber] = useState(storedMatchNumber);  // Set initial matchNumber
+  const [matchTeams, setMatchTeams] = useState([]);
+  const [teamAverages, setTeamAverages] = useState({});
   const [loading, setLoading] = useState(false);
-  const [eventCode, setEventCode] = useState(localStorage.getItem('eventCode') || ''); // Retrieve event code from localStorage
+  
+  // Cache for match data (to avoid fetching the same data again)
+  const [matchDataCache, setMatchDataCache] = useState({});
 
-  const db = getFirestore(); // Initialize Firestore
+  // Function to fetch match teams and their stats
+  const fetchMatchTeams = async () => {
+    if (!eventCode || !matchNumber) return;
 
-  // Save eventCode to localStorage whenever it changes
+    // Check if the data for this match is already cached
+    const cacheKey = `${eventCode}_match_${matchNumber}`;
+    if (matchDataCache[cacheKey]) {
+      // If cached, use the data without making a new Firestore request
+      const { teamsInMatch, teamStats } = matchDataCache[cacheKey];
+      setMatchTeams(teamsInMatch);
+      setTeamAverages(teamStats);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const matchRef = collection(db, eventCode);
+      const q = query(
+        matchRef,
+        where('matchNumber', '==', matchNumber)  // Filter data by match number
+      );
+      
+      const querySnapshot = await getDocs(q);
+      const teamsInMatch = [];
+      
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        if (!teamsInMatch.includes(data.teamNumber)) {
+          teamsInMatch.push(data.teamNumber);  // Add team number only once
+        }
+      });
+
+      // Calculate averages for each team
+      const teamStats = await calculateTeamAverages(teamsInMatch);
+
+      // Cache the data in the state
+      setMatchDataCache((prevCache) => ({
+        ...prevCache,
+        [cacheKey]: { teamsInMatch, teamStats }
+      }));
+
+      setMatchTeams(teamsInMatch);
+      setTeamAverages(teamStats);
+
+    } catch (error) {
+      console.error('Error fetching match teams:', error);
+    }
+
+    setLoading(false);
+  };
+
+  // Function to calculate the average stats and matches played for each team
+  const calculateTeamAverages = async (teamsInMatch) => {
+    const teamStats = {};
+
+    // Loop through each team to calculate their averages and matches played
+    for (const teamNumber of teamsInMatch) {
+      const teamRef = collection(db, eventCode);
+      const q = query(
+        teamRef,
+        where('teamNumber', '==', teamNumber)  // Filter by team number
+      );
+      
+      const querySnapshot = await getDocs(q);
+      let totalAutoHighGoals = 0, totalAutoLowGoals = 0, totalTeleHighGoals = 0, totalTeleLowGoals = 0;
+      let matchCount = 0;
+
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        totalAutoHighGoals += data.autoHighGoals;
+        totalAutoLowGoals += data.autoLowGoals;
+        totalTeleHighGoals += data.teleHighGoals;
+        totalTeleLowGoals += data.teleLowGoals;
+        matchCount++;
+      });
+
+      // Calculate average for the team
+      if (matchCount > 0) {
+        teamStats[teamNumber] = {
+          autoHighGoals: totalAutoHighGoals / matchCount,
+          autoLowGoals: totalAutoLowGoals / matchCount,
+          teleHighGoals: totalTeleHighGoals / matchCount,
+          teleLowGoals: totalTeleLowGoals / matchCount,
+          matchesPlayed: matchCount,  // Track the number of matches played
+        };
+      }
+    }
+
+    return teamStats;
+  };
+
+  // useEffect to fetch teams and their averages when eventCode or matchNumber changes
+  useEffect(() => {
+    fetchMatchTeams();
+  }, [eventCode, matchNumber]);
+
+  // Store eventCode and matchNumber in localStorage whenever they change
   useEffect(() => {
     if (eventCode) {
-      localStorage.setItem('eventCode', eventCode);
+      localStorage.setItem('eventCode', eventCode);  // Save eventCode to localStorage
     }
-  }, [eventCode]);
-
-  // Fetch match numbers when the component mounts
-  useEffect(() => {
-    const fetchMatchNumbers = async () => {
-      if (!eventCode) return; // Don't fetch data if there's no eventCode
-      setLoading(true);
-
-      // Dynamically reference the collection based on the event code
-      const matchRef = collection(db, 'events', eventCode, 'matchData'); // Use eventCode for the collection name
-      const matchSnapshot = await getDocs(matchRef);
-      const matches = matchSnapshot.docs.map((doc) => doc.data().matchNumber);
-      setMatchNumbers([...new Set(matches)]); // Get unique match numbers
-      setLoading(false);
-    };
-
-    fetchMatchNumbers();
-  }, [eventCode]);
-
-  // Fetch robots data for the selected match
-  useEffect(() => {
-    const fetchMatchData = async () => {
-      if (selectedMatch && eventCode) {
-        setLoading(true);
-        console.log('Fetching data for match:', selectedMatch); // Debugging line
-
-        // Dynamically reference the collection based on the event code
-        const matchRef = collection(db, 'events', eventCode, 'matchData'); // Use eventCode for the collection name
-        const matchQuery = query(matchRef, where('matchNumber', '==', selectedMatch));
-        const matchSnapshot = await getDocs(matchQuery);
-        console.log('Match snapshot:', matchSnapshot.docs); // Debugging line
-
-        const matchData = matchSnapshot.docs.map(doc => doc.data());
-        console.log('Match data:', matchData); // Debugging line
-
-        // Get the team numbers of the 6 robots in this match
-        const teamNumbersInMatch = matchData.map(data => data.teamNumber);
-        console.log('Teams in this match:', teamNumbersInMatch);
-
-        // Fetch data for these teams from all matches
-        const robotsData = [];
-        for (let teamNumber of teamNumbersInMatch) {
-          const teamQuery = query(matchRef, where('teamNumber', '==', teamNumber));
-          const teamSnapshot = await getDocs(teamQuery);
-          const teamData = teamSnapshot.docs.map(doc => doc.data());
-          
-          // Aggregate the data for this team
-          const aggregatedData = teamData.reduce((acc, data) => {
-            const autoHighGoal = parseInt(data.autoHighGoals, 10) || 0;
-            const autoLowGoal = parseInt(data.autoLowGoals, 10) || 0;
-            const teleHighGoal = parseInt(data.teleHighGoals, 10) || 0;
-            const teleLowGoal = parseInt(data.teleLowGoals, 10) || 0;
-            const endgameStatus = data.endgameStatus || 0;
-        
-            // Add data to aggregates
-            acc.autoHighGoals.push(autoHighGoal);
-            acc.autoLowGoals.push(autoLowGoal);
-            acc.teleHighGoals.push(teleHighGoal);
-            acc.teleLowGoals.push(teleLowGoal);
-            acc.endgameStatus.push(endgameStatus);
-        
-            return acc;
-          }, {
-            teamNumber,
-            autoHighGoals: [],
-            autoLowGoals: [],
-            teleHighGoals: [],
-            teleLowGoals: [],
-            endgameStatus: [],
-          });
-
-          // Calculate averages
-          const avgAutoHighGoals = aggregatedData.autoHighGoals.reduce((sum, val) => sum + val, 0) / aggregatedData.autoHighGoals.length;
-          const avgAutoLowGoals = aggregatedData.autoLowGoals.reduce((sum, val) => sum + val, 0) / aggregatedData.autoLowGoals.length;
-          const avgTeleHighGoals = aggregatedData.teleHighGoals.reduce((sum, val) => sum + val, 0) / aggregatedData.teleHighGoals.length;
-          const avgTeleLowGoals = aggregatedData.teleLowGoals.reduce((sum, val) => sum + val, 0) / aggregatedData.teleLowGoals.length;
-          const avgEndgameStatus = aggregatedData.endgameStatus.reduce((sum, val) => sum + val, 0) / aggregatedData.endgameStatus.length;
-
-          robotsData.push({
-            teamNumber: aggregatedData.teamNumber,
-            avgAutoHighGoals,
-            avgAutoLowGoals,
-            avgTeleHighGoals,
-            avgTeleLowGoals,
-            avgEndgameStatus
-          });
-        }
-        
-        setRobotsData(robotsData);
-        setLoading(false);
-      }
-    };
-  
-    fetchMatchData();
-  }, [selectedMatch, eventCode]);
-
-  const handleMatchSelect = (e) => {
-    setSelectedMatch(e.target.value);
-  };
-
-  const handleEventCodeChange = (e) => {
-    setEventCode(e.target.value);
-  };
+    if (matchNumber) {
+      localStorage.setItem('matchNumber', matchNumber);  // Save matchNumber to localStorage
+    }
+  }, [eventCode, matchNumber]);
 
   return (
     <div>
-      <div className="main-content">
-        {/* Event Code input field */}
+      <h2>Competition Dashboard</h2>
+      <div className="dashboard-container">
+        {/* Event Code Input */}
         <div className="form-group">
           <label>Event Code:</label>
           <input
             type="text"
             value={eventCode}
-            onChange={handleEventCodeChange}
+            onChange={(e) => setEventCode(e.target.value)}  // Update eventCode state
             placeholder="Enter Event Code"
+            required
           />
         </div>
 
-        <h2>Data Dashboard</h2>
-
-        <div className="scouting-container">
-          <div className="form-group">
-            <label>Completed Matches:</label>
-            <select onChange={handleMatchSelect} disabled={loading}>
-              <option value="">Select a Match</option>
-              {matchNumbers.map((match) => (
-                <option key={match} value={match}>
-                  Match {match}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          <h3>{selectedMatch ? `Match ${selectedMatch} Robot Analysis` : 'Select a Match'}</h3>
-
-          {loading && <p>Loading data...</p>}
-
-          <div className="robots-container">
-            {robotsData.length > 0 ? (
-              robotsData.map((robot) => (
-                <div key={robot.teamNumber} className="robot-card">
-                  <h5>{robot.teamNumber}</h5>
-                  <p>Average Auto High Goals: {robot.avgAutoHighGoals.toFixed(2)}</p>
-                  <p>Average Auto Low Goals: {robot.avgAutoLowGoals.toFixed(2)}</p>
-                  <p>Average Tele High Goals: {robot.avgTeleHighGoals.toFixed(2)}</p>
-                  <p>Average Tele Low Goals: {robot.avgTeleLowGoals.toFixed(2)}</p>
-                  <p>Average Endgame Status: {robot.avgEndgameStatus.toFixed(2)}</p>
-                </div>
-              ))
-            ) : (
-              <p>No data for this match.</p>
-            )}
-          </div>
+        {/* Match Number Dropdown */}
+        <div className="form-group">
+          <label>Match Number:</label>
+          <select
+            value={matchNumber}
+            onChange={(e) => setMatchNumber(Number(e.target.value))}  // Update matchNumber state
+            required
+          >
+            {[...Array(80).keys()].map((num) => (
+              <option key={num + 1} value={num + 1}>
+                Match {num + 1}
+              </option>
+            ))}
+          </select>
         </div>
+
+        {/* Display Loading */}
+        {loading && <p>Loading...</p>}
+
+        {/* Display Stats for Each Team */}
+        {!loading && matchTeams.length > 0 && (
+          <div>
+            <h3>Teams in Match {matchNumber}:</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>Team Number</th>
+                  <th>Matches Played</th>
+                  <th>Auto High Goals (Avg)</th>
+                  <th>Auto Low Goals (Avg)</th>
+                  <th>Tele High Goals (Avg)</th>
+                  <th>Tele Low Goals (Avg)</th>
+                </tr>
+              </thead>
+              <tbody>
+                {matchTeams.map((teamNumber) => (
+                  <tr key={teamNumber}>
+                    <td>{teamNumber}</td>
+                    <td>{teamAverages[teamNumber]?.matchesPlayed || 'N/A'}</td>
+                    <td>{teamAverages[teamNumber]?.autoHighGoals.toFixed(2) || 'N/A'}</td>
+                    <td>{teamAverages[teamNumber]?.autoLowGoals.toFixed(2) || 'N/A'}</td>
+                    <td>{teamAverages[teamNumber]?.teleHighGoals.toFixed(2) || 'N/A'}</td>
+                    <td>{teamAverages[teamNumber]?.teleLowGoals.toFixed(2) || 'N/A'}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );

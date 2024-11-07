@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, addDoc } from 'firebase/firestore';  // Firestore methods
 import { auth, db } from '../firebase';  // Import Firebase authentication and Firestore instance
 import { onAuthStateChanged } from 'firebase/auth';  // Firebase Auth state change method
+import './Scouting.css'; // Ensure the CSS is imported
 
 const Scouting = () => {
   const [user, setUser] = useState(null);
