@@ -1,193 +1,140 @@
 import React, { useState, useEffect } from 'react';
-import { db } from '../firebase';  // Firestore instance
-import { collection, query, where, getDocs } from 'firebase/firestore';  // Firestore methods
+import { db } from '../firebase'; // Your Firestore instance
+import { collection, getDocs } from 'firebase/firestore';
+import axios from 'axios'; // To make API requests
 
 const Dashboard = () => {
-  const storedEventCode = localStorage.getItem('eventCode') || '';  // Fetch eventCode from localStorage
-  const storedMatchNumber = Number(localStorage.getItem('matchNumber')) || 1;  // Fetch matchNumber from localStorage
+  const [matches, setMatches] = useState([]); // Store the match data
+  const [selectedMatch, setSelectedMatch] = useState(null); // Currently selected match
+  const [matchDetails, setMatchDetails] = useState(null); // Store match details (teams, etc.)
+  const [loading, setLoading] = useState(true); // To handle loading state
+  const [eventCode, setEventCode] = useState('MIMIL'); // Default event code
+  const [error, setError] = useState(null); // To store any error message
 
-  const [eventCode, setEventCode] = useState(storedEventCode);  // Set initial eventCode from localStorage
-  const [matchNumber, setMatchNumber] = useState(storedMatchNumber);  // Set initial matchNumber
-  const [matchTeams, setMatchTeams] = useState([]);
-  const [teamAverages, setTeamAverages] = useState({});
-  const [loading, setLoading] = useState(false);
-  
-  // Cache for match data (to avoid fetching the same data again)
-  const [matchDataCache, setMatchDataCache] = useState({});
-
-  // Function to fetch match teams and their stats
-  const fetchMatchTeams = async () => {
-    if (!eventCode || !matchNumber) return;
-
-    // Check if the data for this match is already cached
-    const cacheKey = `${eventCode}_match_${matchNumber}`;
-    if (matchDataCache[cacheKey]) {
-      // If cached, use the data without making a new Firestore request
-      const { teamsInMatch, teamStats } = matchDataCache[cacheKey];
-      setMatchTeams(teamsInMatch);
-      setTeamAverages(teamStats);
-      return;
-    }
-
+  // Fetch match schedule from the API
+  const fetchSchedule = async (eventCode) => {
     setLoading(true);
-
+    setError(null);
     try {
-      const matchRef = collection(db, eventCode);
-      const q = query(
-        matchRef,
-        where('matchNumber', '==', matchNumber)  // Filter data by match number
-      );
-      
-      const querySnapshot = await getDocs(q);
-      const teamsInMatch = [];
-      
-      querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        if (!teamsInMatch.includes(data.teamNumber)) {
-          teamsInMatch.push(data.teamNumber);  // Add team number only once
-        }
+      const response = await axios.get(`https://cors-anywhere.herokuapp.com/https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}`, {
+        headers: {
+          'Authorization': `Basic JKippy:2750647e-ded4-443d-802e-f1a371205161`,
+        },
       });
-
-      // Calculate averages for each team
-      const teamStats = await calculateTeamAverages(teamsInMatch);
-
-      // Cache the data in the state
-      setMatchDataCache((prevCache) => ({
-        ...prevCache,
-        [cacheKey]: { teamsInMatch, teamStats }
-      }));
-
-      setMatchTeams(teamsInMatch);
-      setTeamAverages(teamStats);
-
+      const schedule = response.data.Schedule;
+      setMatches(schedule);
     } catch (error) {
-      console.error('Error fetching match teams:', error);
+      setError('Failed to fetch match schedule. Please try again later.');
+      console.error('Error fetching match schedule:', error);
+    } finally {
+      setLoading(false);
     }
+  };  
 
-    setLoading(false);
-  };
-
-  // Function to calculate the average stats and matches played for each team
-  const calculateTeamAverages = async (teamsInMatch) => {
-    const teamStats = {};
-
-    // Loop through each team to calculate their averages and matches played
-    for (const teamNumber of teamsInMatch) {
-      const teamRef = collection(db, eventCode);
-      const q = query(
-        teamRef,
-        where('teamNumber', '==', teamNumber)  // Filter by team number
-      );
-      
-      const querySnapshot = await getDocs(q);
-      let totalAutoHighGoals = 0, totalAutoLowGoals = 0, totalTeleHighGoals = 0, totalTeleLowGoals = 0;
-      let matchCount = 0;
-
+  // Fetch match data from Firestore
+  const fetchMatchDataFromFirestore = async () => {
+    try {
+      const matchRef = collection(db, 'matchData'); // Assume match data is stored in 'matchData' collection
+      const querySnapshot = await getDocs(matchRef);
+      const matchesFromFirestore = [];
       querySnapshot.forEach((doc) => {
-        const data = doc.data();
-        totalAutoHighGoals += data.autoHighGoals;
-        totalAutoLowGoals += data.autoLowGoals;
-        totalTeleHighGoals += data.teleHighGoals;
-        totalTeleLowGoals += data.teleLowGoals;
-        matchCount++;
+        matchesFromFirestore.push(doc.data());
       });
-
-      // Calculate average for the team
-      if (matchCount > 0) {
-        teamStats[teamNumber] = {
-          autoHighGoals: totalAutoHighGoals / matchCount,
-          autoLowGoals: totalAutoLowGoals / matchCount,
-          teleHighGoals: totalTeleHighGoals / matchCount,
-          teleLowGoals: totalTeleLowGoals / matchCount,
-          matchesPlayed: matchCount,  // Track the number of matches played
-        };
-      }
+      // Optionally, merge API schedule data with Firestore data if needed
+    } catch (error) {
+      console.error('Error fetching Firestore data:', error);
     }
-
-    return teamStats;
   };
 
-  // useEffect to fetch teams and their averages when eventCode or matchNumber changes
-  useEffect(() => {
-    fetchMatchTeams();
-  }, [eventCode, matchNumber]);
+  // Handle match selection
+  const handleMatchSelect = (matchNumber) => {
+    const match = matches.find((match) => match.matchNumber === matchNumber);
+    setSelectedMatch(match);
+    setMatchDetails(match); // You can extend this to fetch more data or details as needed
+  };
 
-  // Store eventCode and matchNumber in localStorage whenever they change
+  // Handle event code change
+  const handleEventCodeChange = (e) => {
+    setEventCode(e.target.value); // Update event code based on user input
+  };
+
+  // Effect hook to fetch schedule data when the component mounts or eventCode changes
   useEffect(() => {
-    if (eventCode) {
-      localStorage.setItem('eventCode', eventCode);  // Save eventCode to localStorage
-    }
-    if (matchNumber) {
-      localStorage.setItem('matchNumber', matchNumber);  // Save matchNumber to localStorage
-    }
-  }, [eventCode, matchNumber]);
+    fetchSchedule();
+    fetchMatchDataFromFirestore();
+  }, [eventCode]); // Re-fetch when event code changes
 
   return (
-    <div>
-      <h2>Competition Dashboard</h2>
-      <div className="dashboard-container">
-        {/* Event Code Input */}
-        <div className="form-group">
-          <label>Event Code:</label>
-          <input
-            type="text"
-            value={eventCode}
-            onChange={(e) => setEventCode(e.target.value)}  // Update eventCode state
-            placeholder="Enter Event Code"
-            required
-          />
-        </div>
+    <div className="dashboard">
+      <h2>Competitive Robot Dashboard</h2>
 
-        {/* Match Number Dropdown */}
-        <div className="form-group">
-          <label>Match Number:</label>
-          <select
-            value={matchNumber}
-            onChange={(e) => setMatchNumber(Number(e.target.value))}  // Update matchNumber state
-            required
-          >
-            {[...Array(80).keys()].map((num) => (
-              <option key={num + 1} value={num + 1}>
-                Match {num + 1}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Display Loading */}
-        {loading && <p>Loading...</p>}
-
-        {/* Display Stats for Each Team */}
-        {!loading && matchTeams.length > 0 && (
-          <div>
-            <h3>Teams in Match {matchNumber}:</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Team Number</th>
-                  <th>Matches Played</th>
-                  <th>Auto High Goals (Avg)</th>
-                  <th>Auto Low Goals (Avg)</th>
-                  <th>Tele High Goals (Avg)</th>
-                  <th>Tele Low Goals (Avg)</th>
-                </tr>
-              </thead>
-              <tbody>
-                {matchTeams.map((teamNumber) => (
-                  <tr key={teamNumber}>
-                    <td>{teamNumber}</td>
-                    <td>{teamAverages[teamNumber]?.matchesPlayed || 'N/A'}</td>
-                    <td>{teamAverages[teamNumber]?.autoHighGoals.toFixed(2) || 'N/A'}</td>
-                    <td>{teamAverages[teamNumber]?.autoLowGoals.toFixed(2) || 'N/A'}</td>
-                    <td>{teamAverages[teamNumber]?.teleHighGoals.toFixed(2) || 'N/A'}</td>
-                    <td>{teamAverages[teamNumber]?.teleLowGoals.toFixed(2) || 'N/A'}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+      {/* Event Code Input */}
+      <div>
+        <label htmlFor="eventCode">Enter Event Code:</label>
+        <input
+          id="eventCode"
+          type="text"
+          value={eventCode}
+          onChange={handleEventCodeChange}
+          placeholder="e.g., MIMIL"
+        />
+        <button onClick={fetchSchedule}>Fetch Schedule</button>
       </div>
+
+      {/* Error Message */}
+      {error && <p style={{ color: 'red' }}>{error}</p>}
+
+      {loading ? (
+        <p>Loading match schedule...</p>
+      ) : (
+        <>
+          <div className="match-select">
+            <label>Select Match:</label>
+            <select onChange={(e) => handleMatchSelect(Number(e.target.value))}>
+              <option value="">--Select a Match--</option>
+              {matches.map((match) => (
+                <option key={match.matchNumber} value={match.matchNumber}>
+                  Match {match.matchNumber} - {match.description}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          {selectedMatch && (
+            <div className="match-details">
+              <h3>Match Details</h3>
+              <p><strong>Description:</strong> {selectedMatch.description}</p>
+              <p><strong>Start Time:</strong> {new Date(selectedMatch.startTime).toLocaleString()}</p>
+
+              <div>
+                <h4>Red Alliance</h4>
+                <ul>
+                  {selectedMatch.teams
+                    .filter((team) => team.station.startsWith('Red'))
+                    .map((team) => (
+                      <li key={team.teamNumber}>
+                        Team {team.teamNumber} - Station {team.station}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+
+              <div>
+                <h4>Blue Alliance</h4>
+                <ul>
+                  {selectedMatch.teams
+                    .filter((team) => team.station.startsWith('Blue'))
+                    .map((team) => (
+                      <li key={team.teamNumber}>
+                        Team {team.teamNumber} - Station {team.station}
+                      </li>
+                    ))}
+                </ul>
+              </div>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };
