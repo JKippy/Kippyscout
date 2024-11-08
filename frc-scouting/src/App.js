@@ -10,6 +10,7 @@ import Login from "./components/Login";
 import SignUp from "./components/SignUp";
 import Header from "./components/Header";
 import Settings from "./pages/Settings";
+import PopulateFirestore from "./pages/populateFirestore"
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -41,6 +42,7 @@ const App = () => {
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUp />} />
             <Route path="/settings" element={<Settings />} />
+            <Route path="/populateFirestore" element={<PopulateFirestore />} />
           </Routes>
         </div>
       </Router>

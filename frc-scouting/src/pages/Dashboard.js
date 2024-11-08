@@ -20,7 +20,7 @@ const Dashboard = () => {
     const response = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://cors-anywhere.herokuapp.com/https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}?tournamentLevel=Qualification`,
+      url: `https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}?tournamentLevel=Qualification`,
       headers: { 
         'Authorization': `Basic ${process.env.REACT_APP_FRC_API_AUTH_STRING}`, 
         'If-Modified-Since': ''
