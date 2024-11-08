@@ -15,21 +15,26 @@ const Dashboard = () => {
   const fetchSchedule = async (eventCode) => {
     setLoading(true);
     setError(null);
-    try {
-      const response = await axios.get(`https://cors-anywhere.herokuapp.com/https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}`, {
-        headers: {
-          'Authorization': `Basic JKippy:2750647e-ded4-443d-802e-f1a371205161`,
-        },
-      });
-      const schedule = response.data.Schedule;
-      setMatches(schedule);
-    } catch (error) {
-      setError('Failed to fetch match schedule. Please try again later.');
-      console.error('Error fetching match schedule:', error);
-    } finally {
-      setLoading(false);
-    }
-  };  
+    console.log("Event Code:", eventCode);
+    console.log("keyts", `Basic ${process.env.REACT_APP_FRC_API_USERNAME}:${process.env.REACT_APP_FRC_API_AUTH_TOKEN}`);
+    var response = {
+      method: 'get',
+    maxBodyLength: Infinity,
+      url: `https://cors-anywhere.herokuapp.com/https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}?tournamentLevel=Qualification`,
+      headers: { 
+        'Authorization': `Basic ${process.env.REACT_APP_FRC_API_AUTH_STRING}`, 
+        'If-Modified-Since': ''
+      }
+    };
+    
+    axios(response)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+  };
 
   // Fetch match data from Firestore
   const fetchMatchDataFromFirestore = async () => {
@@ -60,8 +65,10 @@ const Dashboard = () => {
 
   // Effect hook to fetch schedule data when the component mounts or eventCode changes
   useEffect(() => {
-    fetchSchedule();
-    fetchMatchDataFromFirestore();
+    if (eventCode) {
+      fetchSchedule(eventCode); // Pass eventCode explicitly
+      fetchMatchDataFromFirestore();
+    }
   }, [eventCode]); // Re-fetch when event code changes
 
   return (
@@ -78,7 +85,7 @@ const Dashboard = () => {
           onChange={handleEventCodeChange}
           placeholder="e.g., MIMIL"
         />
-        <button onClick={fetchSchedule}>Fetch Schedule</button>
+        <button onClick={() => fetchSchedule(eventCode)}>Fetch Schedule</button>
       </div>
 
       {/* Error Message */}
