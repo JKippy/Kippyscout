@@ -2,11 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'; // Your Firestore instance
 import { collection, getDocs } from 'firebase/firestore';
 import axios from 'axios'; // To make API requests
+import './Dashboard.css';
 
 const Dashboard = () => {
   const [matches, setMatches] = useState([]); // Store the match data
   const [selectedMatch, setSelectedMatch] = useState(null); // Currently selected match
-  const [matchDetails, setMatchDetails] = useState(null); // Store match details (teams, etc.)
   const [loading, setLoading] = useState(true); // To handle loading state
   const [eventCode, setEventCode] = useState('MIMIL'); // Default event code
   const [error, setError] = useState(null); // To store any error message
@@ -16,38 +16,25 @@ const Dashboard = () => {
     setLoading(true);
     setError(null);
     console.log("Event Code:", eventCode);
-    console.log("keyts", `Basic ${process.env.REACT_APP_FRC_API_USERNAME}:${process.env.REACT_APP_FRC_API_AUTH_TOKEN}`);
-    var response = {
+    
+    const response = {
       method: 'get',
-    maxBodyLength: Infinity,
+      maxBodyLength: Infinity,
       url: `https://cors-anywhere.herokuapp.com/https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}?tournamentLevel=Qualification`,
       headers: { 
         'Authorization': `Basic ${process.env.REACT_APP_FRC_API_AUTH_STRING}`, 
         'If-Modified-Since': ''
       }
     };
-    
-    axios(response)
-    .then(function (response) {
-      console.log(JSON.stringify(response.data));
-    })
-    .catch(function (error) {
-      console.log(error);
-    });
-  };
 
-  // Fetch match data from Firestore
-  const fetchMatchDataFromFirestore = async () => {
     try {
-      const matchRef = collection(db, 'matchData'); // Assume match data is stored in 'matchData' collection
-      const querySnapshot = await getDocs(matchRef);
-      const matchesFromFirestore = [];
-      querySnapshot.forEach((doc) => {
-        matchesFromFirestore.push(doc.data());
-      });
-      // Optionally, merge API schedule data with Firestore data if needed
+      const result = await axios(response);
+      setMatches(result.data.Schedule); // Store the matches in the state
+      setLoading(false);
     } catch (error) {
-      console.error('Error fetching Firestore data:', error);
+      console.error("Error fetching schedule:", error);
+      setError("Error fetching match schedule");
+      setLoading(false);
     }
   };
 
@@ -55,7 +42,6 @@ const Dashboard = () => {
   const handleMatchSelect = (matchNumber) => {
     const match = matches.find((match) => match.matchNumber === matchNumber);
     setSelectedMatch(match);
-    setMatchDetails(match); // You can extend this to fetch more data or details as needed
   };
 
   // Handle event code change
@@ -67,7 +53,6 @@ const Dashboard = () => {
   useEffect(() => {
     if (eventCode) {
       fetchSchedule(eventCode); // Pass eventCode explicitly
-      fetchMatchDataFromFirestore();
     }
   }, [eventCode]); // Re-fetch when event code changes
 
