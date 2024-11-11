@@ -20,7 +20,7 @@ const Dashboard = () => {
     const response = {
       method: 'get',
       maxBodyLength: Infinity,
-      url: `https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}?tournamentLevel=Qualification`,
+      url: `https://cors-anywhere.herokuapp.com/https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}?tournamentLevel=Qualification`,
       headers: { 
         'Authorization': `Basic ${process.env.REACT_APP_FRC_API_AUTH_STRING}`, 
         'If-Modified-Since': ''
@@ -29,6 +29,13 @@ const Dashboard = () => {
 
     try {
       const result = await axios(response);
+      // Save the response to localStorage with a timestamp
+      const dataToStore = {
+        timestamp: Date.now(),
+        matches: result.data.Schedule,
+      };
+      localStorage.setItem(`schedule_${eventCode}`, JSON.stringify(dataToStore));
+
       setMatches(result.data.Schedule); // Store the matches in the state
       setLoading(false);
     } catch (error) {
@@ -36,6 +43,21 @@ const Dashboard = () => {
       setError("Error fetching match schedule");
       setLoading(false);
     }
+  };
+
+  // Check if the data is in localStorage
+  const getScheduleFromLocalStorage = (eventCode) => {
+    const storedData = localStorage.getItem(`schedule_${eventCode}`);
+    if (storedData) {
+      const parsedData = JSON.parse(storedData);
+      const timeDifference = Date.now() - parsedData.timestamp;
+      
+      // If the data is older than 1 hour (3600000 ms), re-fetch it
+      if (timeDifference < 3600000) {
+        return parsedData.matches;
+      }
+    }
+    return null;
   };
 
   // Handle match selection
@@ -51,14 +73,20 @@ const Dashboard = () => {
 
   // Effect hook to fetch schedule data when the component mounts or eventCode changes
   useEffect(() => {
-    if (eventCode) {
-      fetchSchedule(eventCode); // Pass eventCode explicitly
+    const storedMatches = getScheduleFromLocalStorage(eventCode);
+    
+    if (storedMatches) {
+      // If the data is available in localStorage and it's not too old, use it
+      setMatches(storedMatches);
+      setLoading(false);
+    } else {
+      fetchSchedule(eventCode); // Fetch fresh data if not available or outdated
     }
   }, [eventCode]); // Re-fetch when event code changes
 
   return (
     <div className="dashboard">
-      <h2>Competitive Robot Dashboard</h2>
+      <h2>Drive Team Dashboard</h2>
 
       {/* Event Code Input */}
       <div>
@@ -105,7 +133,7 @@ const Dashboard = () => {
                     .filter((team) => team.station.startsWith('Red'))
                     .map((team) => (
                       <li key={team.teamNumber}>
-                        Team {team.teamNumber} - Station {team.station}
+                        {team.station} - {team.teamNumber}
                       </li>
                     ))}
                 </ul>
@@ -118,7 +146,7 @@ const Dashboard = () => {
                     .filter((team) => team.station.startsWith('Blue'))
                     .map((team) => (
                       <li key={team.teamNumber}>
-                        Team {team.teamNumber} - Station {team.station}
+                        {team.station} - {team.teamNumber}
                       </li>
                     ))}
                 </ul>
