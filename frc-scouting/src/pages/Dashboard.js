@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'; // Your Firestore instance
-import { collection, getDocs } from 'firebase/firestore';
+import { collection, getDocs, query, where } from 'firebase/firestore'; // For querying Firestore
 import axios from 'axios'; // To make API requests
 import './Dashboard.css';
 
@@ -10,6 +10,7 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true); // To handle loading state
   const [eventCode, setEventCode] = useState('MIMIL'); // Default event code
   const [error, setError] = useState(null); // To store any error message
+  const [teamStats, setTeamStats] = useState({}); // To store calculated team stats
 
   // Fetch match schedule from the API
   const fetchSchedule = async (eventCode) => {
@@ -64,7 +65,79 @@ const Dashboard = () => {
   const handleMatchSelect = (matchNumber) => {
     const match = matches.find((match) => match.matchNumber === matchNumber);
     setSelectedMatch(match);
+    fetchTeamStats(match); // Fetch team stats when match is selected
   };
+
+  // Fetch data for a specific team from Firestore
+  const fetchTeamStats = async (match) => {
+  const teamsInMatch = [
+    ...match.teams.filter((team) => team.station.startsWith('Red')).map((team) => team.teamNumber),
+    ...match.teams.filter((team) => team.station.startsWith('Blue')).map((team) => team.teamNumber),
+  ];
+
+  const stats = {};
+  for (let teamNumber of teamsInMatch) {
+    const teamData = await fetchTeamData(teamNumber);
+    console.log(`Fetched data for team ${teamNumber}:`, teamData); // Debugging line to check data
+    if (teamData) {
+      stats[teamNumber] = calculateAverages([teamData]); // Wrap data in an array since it's a single document
+    }
+  }
+
+  setTeamStats(stats);
+};
+
+// Fetch data for a specific team from Firestore
+const fetchTeamData = async (teamNumber) => {
+  const eventCollection = collection(db, eventCode); // Firestore collection for event
+  const teamRef = query(eventCollection, where("teamNumber", "==", teamNumber));
+
+  try {
+    const teamSnapshot = await getDocs(teamRef);
+    if (teamSnapshot.empty) {
+      console.log(`No data found for team ${teamNumber}`);
+      return null;
+    }
+
+    let teamData = null;
+    teamSnapshot.forEach((doc) => {
+      teamData = doc.data(); // Assuming each team has one document with their data
+    });
+
+    console.log(`Data for team ${teamNumber}:`, teamData); // Debugging line to check team data
+    return teamData;
+  } catch (error) {
+    console.error(`Error fetching data for team ${teamNumber}:`, error);
+    return null;
+  }
+};
+
+// Calculate average statistics for a team
+const calculateAverages = (teamData) => {
+  const totalStats = teamData.reduce(
+    (totals, data) => {
+      totals.autoHighGoal += data.autoHighGoals || 0; // Correct field names based on your Firestore data
+      totals.autoLowGoal += data.autoLowGoals || 0; // Correct field names based on your Firestore data
+      totals.teleHighGoal += data.teleHighGoals || 0; // Correct field names based on your Firestore data
+      totals.teleLowGoal += data.teleLowGoals || 0; // Correct field names based on your Firestore data
+      totals.count += 1;
+      return totals;
+    },
+    { autoHighGoal: 0, autoLowGoal: 0, teleHighGoal: 0, teleLowGoal: 0, count: 0 }
+  );
+
+  // Prevent division by zero if there is no valid data
+  const averages = {
+    autoHighGoal: totalStats.count > 0 ? totalStats.autoHighGoal / totalStats.count : 0,
+    autoLowGoal: totalStats.count > 0 ? totalStats.autoLowGoal / totalStats.count : 0,
+    teleHighGoal: totalStats.count > 0 ? totalStats.teleHighGoal / totalStats.count : 0,
+    teleLowGoal: totalStats.count > 0 ? totalStats.teleLowGoal / totalStats.count : 0,
+  };
+
+  console.log('Calculated averages:', averages); // Debugging line to check averages
+  return averages;
+};
+
 
   // Handle event code change
   const handleEventCodeChange = (e) => {
@@ -134,6 +207,14 @@ const Dashboard = () => {
                     .map((team) => (
                       <li key={team.teamNumber}>
                         {team.station} - {team.teamNumber}
+                        {teamStats[team.teamNumber] && (
+                          <div>
+                            <p>Avg Auto High: {teamStats[team.teamNumber].autoHighGoal}</p>
+                            <p>Avg Auto Low: {teamStats[team.teamNumber].autoLowGoal}</p>
+                            <p>Avg Tele High: {teamStats[team.teamNumber].teleHighGoal}</p>
+                            <p>Avg Tele Low: {teamStats[team.teamNumber].teleLowGoal}</p>
+                          </div>
+                        )}
                       </li>
                     ))}
                 </ul>
@@ -147,6 +228,14 @@ const Dashboard = () => {
                     .map((team) => (
                       <li key={team.teamNumber}>
                         {team.station} - {team.teamNumber}
+                        {teamStats[team.teamNumber] && (
+                          <div>
+                            <p>Avg Auto High: {teamStats[team.teamNumber].autoHighGoal}</p>
+                            <p>Avg Auto Low: {teamStats[team.teamNumber].autoLowGoal}</p>
+                            <p>Avg Tele High: {teamStats[team.teamNumber].teleHighGoal}</p>
+                            <p>Avg Tele Low: {teamStats[team.teamNumber].teleLowGoal}</p>
+                          </div>
+                        )}
                       </li>
                     ))}
                 </ul>
