@@ -70,74 +70,99 @@ const Dashboard = () => {
 
   // Fetch data for a specific team from Firestore
   const fetchTeamStats = async (match) => {
-  const teamsInMatch = [
-    ...match.teams.filter((team) => team.station.startsWith('Red')).map((team) => team.teamNumber),
-    ...match.teams.filter((team) => team.station.startsWith('Blue')).map((team) => team.teamNumber),
-  ];
+    const teamsInMatch = [
+      ...match.teams.filter((team) => team.station.startsWith('Red')).map((team) => team.teamNumber),
+      ...match.teams.filter((team) => team.station.startsWith('Blue')).map((team) => team.teamNumber),
+    ];
 
-  const stats = {};
-  for (let teamNumber of teamsInMatch) {
-    const teamData = await fetchTeamData(teamNumber);
-    console.log(`Fetched data for team ${teamNumber}:`, teamData); // Debugging line to check data
-    if (teamData) {
-      stats[teamNumber] = calculateAverages([teamData]); // Wrap data in an array since it's a single document
-    }
-  }
-
-  setTeamStats(stats);
-};
-
-// Fetch data for a specific team from Firestore
-const fetchTeamData = async (teamNumber) => {
-  const eventCollection = collection(db, eventCode); // Firestore collection for event
-  const teamRef = query(eventCollection, where("teamNumber", "==", teamNumber));
-
-  try {
-    const teamSnapshot = await getDocs(teamRef);
-    if (teamSnapshot.empty) {
-      console.log(`No data found for team ${teamNumber}`);
-      return null;
+    const stats = {};
+    for (let teamNumber of teamsInMatch) {
+      const teamData = await fetchTeamData(teamNumber);
+      console.log(`Fetched data for team ${teamNumber}:`, teamData); // Debugging line to check data
+      if (teamData) {
+        stats[teamNumber] = calculateAverages([teamData]); // Wrap data in an array since it's a single document
+      }
     }
 
-    let teamData = null;
-    teamSnapshot.forEach((doc) => {
-      teamData = doc.data(); // Assuming each team has one document with their data
-    });
-
-    console.log(`Data for team ${teamNumber}:`, teamData); // Debugging line to check team data
-    return teamData;
-  } catch (error) {
-    console.error(`Error fetching data for team ${teamNumber}:`, error);
-    return null;
-  }
-};
-
-// Calculate average statistics for a team
-const calculateAverages = (teamData) => {
-  const totalStats = teamData.reduce(
-    (totals, data) => {
-      totals.autoHighGoal += data.autoHighGoals || 0; // Correct field names based on your Firestore data
-      totals.autoLowGoal += data.autoLowGoals || 0; // Correct field names based on your Firestore data
-      totals.teleHighGoal += data.teleHighGoals || 0; // Correct field names based on your Firestore data
-      totals.teleLowGoal += data.teleLowGoals || 0; // Correct field names based on your Firestore data
-      totals.count += 1;
-      return totals;
-    },
-    { autoHighGoal: 0, autoLowGoal: 0, teleHighGoal: 0, teleLowGoal: 0, count: 0 }
-  );
-
-  // Prevent division by zero if there is no valid data
-  const averages = {
-    autoHighGoal: totalStats.count > 0 ? totalStats.autoHighGoal / totalStats.count : 0,
-    autoLowGoal: totalStats.count > 0 ? totalStats.autoLowGoal / totalStats.count : 0,
-    teleHighGoal: totalStats.count > 0 ? totalStats.teleHighGoal / totalStats.count : 0,
-    teleLowGoal: totalStats.count > 0 ? totalStats.teleLowGoal / totalStats.count : 0,
+    setTeamStats(stats);
   };
 
-  console.log('Calculated averages:', averages); // Debugging line to check averages
-  return averages;
-};
+  // Fetch data for a specific team from Firestore
+  const fetchTeamData = async (teamNumber) => {
+    const eventCollection = collection(db, eventCode); // Firestore collection for event
+    const teamRef = query(eventCollection, where("teamNumber", "==", teamNumber));
 
+    try {
+      const teamSnapshot = await getDocs(teamRef);
+      if (teamSnapshot.empty) {
+        console.log(`No data found for team ${teamNumber}`);
+        return null;
+      }
+
+      let teamData = null;
+      teamSnapshot.forEach((doc) => {
+        teamData = doc.data(); // Assuming each team has one document with their data
+      });
+
+      console.log(`Data for team ${teamNumber}:`, teamData); // Debugging line to check team data
+      return teamData;
+    } catch (error) {
+      console.error(`Error fetching data for team ${teamNumber}:`, error);
+      return null;
+    }
+  };
+
+  // Calculate average statistics for a team
+  const calculateAverages = (teamData) => {
+    const totalStats = teamData.reduce(
+      (totals, data) => {
+        totals.autoHighGoal += data.autoHighGoals || 0; // Correct field names based on your Firestore data
+        totals.autoLowGoal += data.autoLowGoals || 0; // Correct field names based on your Firestore data
+        totals.teleHighGoal += data.teleHighGoals || 0; // Correct field names based on your Firestore data
+        totals.teleLowGoal += data.teleLowGoals || 0; // Correct field names based on your Firestore data
+        totals.count += 1;
+        return totals;
+      },
+      { autoHighGoal: 0, autoLowGoal: 0, teleHighGoal: 0, teleLowGoal: 0, count: 0 }
+    );
+
+    // Prevent division by zero if there is no valid data
+    const averages = {
+      autoHighGoal: totalStats.count > 0 ? totalStats.autoHighGoal / totalStats.count : 0,
+      autoLowGoal: totalStats.count > 0 ? totalStats.autoLowGoal / totalStats.count : 0,
+      teleHighGoal: totalStats.count > 0 ? totalStats.teleHighGoal / totalStats.count : 0,
+      teleLowGoal: totalStats.count > 0 ? totalStats.teleLowGoal / totalStats.count : 0,
+    };
+
+    console.log('Calculated averages:', averages); // Debugging line to check averages
+    return averages;
+  };
+
+  // Calculate alliance averages for a given alliance (Red or Blue)
+  const calculateAllianceAverages = (allianceTeams) => {
+    const totalStats = allianceTeams.reduce(
+      (totals, teamNumber) => {
+        const teamData = teamStats[teamNumber];
+        if (teamData) {
+          totals.autoHighGoal += teamData.autoHighGoal || 0;
+          totals.autoLowGoal += teamData.autoLowGoal || 0;
+          totals.teleHighGoal += teamData.teleHighGoal || 0;
+          totals.teleLowGoal += teamData.teleLowGoal || 0;
+          totals.count += 1;
+        }
+        return totals;
+      },
+      { autoHighGoal: 0, autoLowGoal: 0, teleHighGoal: 0, teleLowGoal: 0, count: 0 }
+    );
+
+    // Calculate the averages
+    return {
+      autoHighGoal: totalStats.count > 0 ? parseFloat((totalStats.autoHighGoal / totalStats.count).toFixed(2)) : 0,
+      autoLowGoal: totalStats.count > 0 ? parseFloat((totalStats.autoLowGoal / totalStats.count).toFixed(2)) : 0,
+      teleHighGoal: totalStats.count > 0 ? parseFloat((totalStats.teleHighGoal / totalStats.count).toFixed(2)) : 0,
+      teleLowGoal: totalStats.count > 0 ? parseFloat((totalStats.teleLowGoal / totalStats.count).toFixed(2)) : 0,
+    };
+  };
 
   // Handle event code change
   const handleEventCodeChange = (e) => {
@@ -199,8 +224,16 @@ const calculateAverages = (teamData) => {
               <p><strong>Description:</strong> {selectedMatch.description}</p>
               <p><strong>Start Time:</strong> {new Date(selectedMatch.startTime).toLocaleString()}</p>
 
+              {/* Red Alliance */}
               <div>
                 <h4>Red Alliance</h4>
+                <div>
+                  {/* Display average scores for the Red Alliance */}
+                  <p>Avg Auto High: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Red')).map(team => team.teamNumber)).autoHighGoal}</p>
+                  <p>Avg Auto Low: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Red')).map(team => team.teamNumber)).autoLowGoal}</p>
+                  <p>Avg Tele High: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Red')).map(team => team.teamNumber)).teleHighGoal}</p>
+                  <p>Avg Tele Low: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Red')).map(team => team.teamNumber)).teleLowGoal}</p>
+                </div>
                 <ul>
                   {selectedMatch.teams
                     .filter((team) => team.station.startsWith('Red'))
@@ -220,8 +253,16 @@ const calculateAverages = (teamData) => {
                 </ul>
               </div>
 
+              {/* Blue Alliance */}
               <div>
                 <h4>Blue Alliance</h4>
+                <div>
+                  {/* Display average scores for the Blue Alliance */}
+                  <p>Avg Auto High: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Blue')).map(team => team.teamNumber)).autoHighGoal}</p>
+                  <p>Avg Auto Low: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Blue')).map(team => team.teamNumber)).autoLowGoal}</p>
+                  <p>Avg Tele High: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Blue')).map(team => team.teamNumber)).teleHighGoal}</p>
+                  <p>Avg Tele Low: {calculateAllianceAverages(selectedMatch.teams.filter(team => team.station.startsWith('Blue')).map(team => team.teamNumber)).teleLowGoal}</p>
+                </div>
                 <ul>
                   {selectedMatch.teams
                     .filter((team) => team.station.startsWith('Blue'))
