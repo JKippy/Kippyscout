@@ -194,7 +194,7 @@ const Dashboard = () => {
           type="text"
           value={eventCode}
           onChange={handleEventCodeChange}
-          placeholder="e.g., MIMIL"
+          placeholder="e.g., MILIV"
         />
         <button onClick={() => fetchSchedule(eventCode)}>Fetch Schedule</button>
       </div>

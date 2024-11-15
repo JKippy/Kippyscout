@@ -5,6 +5,7 @@ import Dashboard from './pages/Dashboard';
 import Scouting from './pages/Scouting';
 import About from './pages/About';
 import EventData from './pages/EventData';
+import TeamData from './pages/TeamData';
 import { authObserver } from "./authService";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
@@ -38,6 +39,7 @@ const App = () => {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/scouting" element={<Scouting />} />
             <Route path="/eventdata" element={<EventData />} />
+            <Route path="/teamdata" element={<TeamData />} />
             <Route path="/about" element={<About />} />
             <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
             <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUp />} />
