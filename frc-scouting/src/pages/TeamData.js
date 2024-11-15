@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { db } from '../firebase'; // Your Firestore setup
-import { collection, query, where, getDocs } from 'firebase/firestore';
+import { db } from '../firebase'; // Your Firestore instance
+import { collection, getDocs, query, where } from 'firebase/firestore'; // For querying Firestore
 
 const TeamData = () => {
   const [eventCode, setEventCode] = useState(''); // Store the event code
@@ -105,11 +105,11 @@ const TeamData = () => {
   };
 
   return (
-    <div>
+    <div className="dashboard">
       <h2>Team Data Dashboard</h2>
 
       {/* Event Code Input */}
-      <div>
+      <div className="form-group">
         <label htmlFor="eventCode">Enter Event Code:</label>
         <input
           type="text"
@@ -125,11 +125,11 @@ const TeamData = () => {
       {loading && <p>Loading teams...</p>}
 
       {/* Error message */}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p>{error}</p>}
 
       {/* Dropdown for team selection */}
       {teams.length > 0 && (
-        <div>
+        <div className="match-select">
           <label htmlFor="teamSelect">Select a Team:</label>
           <select id="teamSelect" onChange={handleTeamSelect} value={selectedTeam}>
             <option value="">-- Select a Team --</option>
@@ -144,7 +144,7 @@ const TeamData = () => {
 
       {/* Display match data for selected team */}
       {selectedTeam && (
-        <div>
+        <div className="match-details">
           <h3>Match Data for Team {selectedTeam}</h3>
           {teamData.length > 0 ? (
             <table>

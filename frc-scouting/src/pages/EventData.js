@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'; // Your Firestore setup
-import { collection, query, where, getDocs } from 'firebase/firestore';
-import './EventData.css'; // Ensure custom styles are added
+import { collection, query, getDocs } from 'firebase/firestore';
+import './EventData.css'; // Custom styles
 
 const EventData = () => {
   const [eventCode, setEventCode] = useState('');
