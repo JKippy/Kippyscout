@@ -14,12 +14,13 @@ const Dashboard = () => {
     setError('');
     
     try {
-      const response = await axios.get(
-        `http://localhost:5000/schedule/${eventCode}`, {
-        headers: { 
-          //'Authorization': `Basic ${process.env.REACT_APP_FRC_API_AUTH_STRING}`,
-          'If-Modified-Since': '',
-        }
+      const apiKey = `${process.env.REACT_APP_API_KEY}` // Make sure the API key is set in Firebase config
+      console.log('API Key:', apiKey);
+
+      const response = await axios.get(`https://cors-anywhere.herokuapp.com/https://frc-api.firstinspires.org/v3.0/2024/schedule/${eventCode}?tournamentLevel=Qualification`, {
+      headers: { 
+        'Authorization': `Basic ${apiKey}`,
+      }
       });
 
       if (response.data.Schedule) {
@@ -29,6 +30,7 @@ const Dashboard = () => {
       }
     } catch (error) {
       console.error('Error fetching schedule:', error);
+      console.error('Error details:', error.response || error);
       setError('Failed to fetch schedule. Please try again.');
     } finally {
       setLoading(false);
