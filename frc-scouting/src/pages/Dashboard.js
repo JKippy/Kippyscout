@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios'; // To make API requests
+import { useEventCode } from '../components/EventCodeContext'; // Import the custom hook
 import { db } from '../firebase'; // Assuming you have Firebase initialized and exported as 'db'
+import { collection, getDocs } from 'firebase/firestore'; // Import modular Firebase methods
 
 const Dashboard = () => {
-  const [eventCode, setEventCode] = useState('');
+  // Access eventCode and updateEventCode from the context
+  const { eventCode, updateEventCode } = useEventCode();
+  
   const [matches, setMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,9 +50,9 @@ const Dashboard = () => {
     const teams = [];
     const averages = {};
     
-    // Query Firestore for all teams for this event
-    const snapshot = await db.collection(eventCode).get(); // Get all match documents for this event
-    snapshot.forEach(doc => {
+    // Query Firestore for all teams for this event using modular SDK
+    const querySnapshot = await getDocs(collection(db, eventCode)); // Use the collection method
+    querySnapshot.forEach(doc => {
       const matchData = doc.data();
       const teamNumber = matchData.teamNumber;
       if (!teams.includes(teamNumber)) {
@@ -89,7 +93,8 @@ const Dashboard = () => {
 
   // Handle event code change
   const handleEventCodeChange = (e) => {
-    setEventCode(e.target.value);
+    const newEventCode = e.target.value;
+    updateEventCode(newEventCode); // Update eventCode in context
   };
 
   // Handle match selection

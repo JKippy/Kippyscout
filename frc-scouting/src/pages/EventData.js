@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { db } from '../firebase'; // Your Firestore setup
 import { collection, query, getDocs } from 'firebase/firestore';
+import { useEventCode } from '../components/EventCodeContext'; // Import the context
 import './EventData.css'; // Custom styles
 
 const EventData = () => {
-  const [eventCode, setEventCode] = useState('');
+  const { eventCode, setEventCode } = useEventCode(); // Access the eventCode from context
   const [teamsData, setTeamsData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -15,7 +16,7 @@ const EventData = () => {
   const fetchEventData = async (eventCode) => {
     setLoading(true);
     setError(null);
-    
+
     const eventCollection = collection(db, eventCode); // Get collection for specific event
     const q = query(eventCollection); // Query to fetch all match data for this event
 

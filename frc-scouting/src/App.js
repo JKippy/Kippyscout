@@ -12,6 +12,7 @@ import SignUp from "./components/SignUp";
 import Header from "./components/Header";
 import Settings from "./pages/Settings";
 import PopulateFirestore from "./pages/populateFirestore"
+import { EventCodeProvider } from './components/EventCodeContext'; // Import the EventCodeProvider
 
 const App = () => {
   const [user, setUser] = useState(null);
@@ -30,24 +31,24 @@ const App = () => {
   }, []);
 
   return (
-      <Router>
-        <Header user={user} />
-        <div>
-          <h1>FRC Event Data</h1>
-          <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/scouting" element={<Scouting />} />
-            <Route path="/eventdata" element={<EventData />} />
-            <Route path="/teamdata" element={<TeamData />} />
-            <Route path="/about" element={<About />} />
-            <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
-            <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUp />} />
-            <Route path="/settings" element={<Settings />} />
-            <Route path="/populateFirestore" element={<PopulateFirestore />} />
-          </Routes>
-        </div>
-      </Router>
+    <EventCodeProvider><Router>
+    <Header user={user} />
+    <div>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/dashboard" element={<Dashboard />} />
+        <Route path="/scouting" element={<Scouting />} />
+        <Route path="/eventdata" element={<EventData />} />
+        <Route path="/teamdata" element={<TeamData />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/login" element={user ? <Navigate to="/" /> : <Login />} />
+        <Route path="/signup" element={user ? <Navigate to="/" /> : <SignUp />} />
+        <Route path="/settings" element={<Settings />} />
+        <Route path="/populateFirestore" element={<PopulateFirestore />} />
+      </Routes>
+    </div>
+  </Router>
+  </EventCodeProvider>
   );
 };
 
