@@ -1,5 +1,4 @@
-/* Scouting.css */
-
+/* General Styles */
 .scouting-container {
   max-width: 600px;
   margin: 20px auto;
@@ -30,15 +29,17 @@ label {
   margin-bottom: 5px;
 }
 
-input, textarea {
+/* Input and Textarea Fields */
+input, textarea, select {
   padding: 10px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
   width: 100%;
+  box-sizing: border-box; /* Ensures padding is included in width */
 }
 
-input:focus, textarea:focus {
+input:focus, textarea:focus, select:focus {
   border-color: #007BFF;
   outline: none;
 }
@@ -47,25 +48,27 @@ textarea {
   resize: vertical; /* Allows vertical resizing */
 }
 
-.submit-button {
-  padding: 10px;
-  border: none;
-  border-radius: 4px;
-  background-color: #007BFF;
-  color: white;
-  font-size: 16px;
-  cursor: pointer;
+/* Dropdown (select) Styles */
+select {
+  -webkit-appearance: none; /* Removes default dropdown arrow for a cleaner look */
+  -moz-appearance: none;
+  appearance: none;
+  background-color: #fff;
+  background-image: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Cpath fill="none" d="M4 5l4 4 4-4z"/%3E%3C/svg%3E');
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  background-size: 16px 16px;
 }
 
-.submit-button:hover {
-  background-color: #0056b3;
+select:focus {
+  border-color: #007BFF;
 }
 
-/* New CSS for the input with buttons */
+/* Input buttons for increment/decrement */
 .input-with-buttons {
   display: flex;
   align-items: center;
-  width: 100%; /* Ensure it takes up the full width of its container */
+  width: 100%;
 }
 
 .input-with-buttons input {
@@ -73,7 +76,7 @@ textarea {
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 16px;
-  width: 60%; /* Make the input box smaller to leave room for buttons */
+  width: 60%; /* Input box takes 60% width */
 }
 
 .input-with-buttons button {
@@ -94,3 +97,66 @@ textarea {
   outline: none;
 }
 
+/* Submit Button */
+.submit-button {
+  padding: 10px;
+  border: none;
+  border-radius: 4px;
+  background-color: #007BFF;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  width: 100%; /* Make the submit button full width */
+}
+
+.submit-button:hover {
+  background-color: #0056b3;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  .scouting-container {
+    padding: 10px;
+  }
+
+  .scouting-form {
+    flex-direction: column;
+  }
+
+  .form-group {
+    margin-bottom: 10px;
+  }
+
+  input, textarea, select, .submit-button {
+    font-size: 14px;
+  }
+
+  .input-with-buttons input {
+    font-size: 14px;
+  }
+
+  .input-with-buttons button {
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 480px) {
+  /* Further adjustments for very small screens */
+  .scouting-container {
+    padding: 10px;
+    margin: 10px;
+  }
+
+  .scouting-form {
+    flex-direction: column;
+  }
+
+  .form-group {
+    margin-bottom: 8px;
+  }
+
+  .submit-button {
+    font-size: 14px;
+    padding: 8px;
+  }
+}

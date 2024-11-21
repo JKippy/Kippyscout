@@ -78,8 +78,9 @@ const Scouting = () => {
       setIsSubmitting(false);
       setMatchData({
         scouterName: '',
+        matchNumber: 0,
+        driverstation: '',
         teamNumber: '',
-        matchNumber: '',
         autoHighGoals: 0,
         autoLowGoals: 0,
         teleHighGoals: 0,
@@ -95,9 +96,8 @@ const Scouting = () => {
 
   return (
     <div>
-      <div className="main-content">
-        <h2>Scouting Page</h2>
-        <p>Here you can enter match scouting data.</p>
+      <div className="scouting">
+        <h2>Scouting Entry</h2>
         <div className="scouting-container">
           <form onSubmit={handleSubmit} className="scouting-form">
             {/* Event Code Input */}
@@ -126,6 +126,52 @@ const Scouting = () => {
               />
             </div>
 
+            {/* Match Number */}
+            <div className="form-group">
+              <label>Match Number:</label>
+              <div className="input-with-buttons">
+                <input
+                  type="number"
+                  name="matchNumber"
+                  value={matchData.matchNumber}
+                  onChange={handleChange}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => handleDecrement('matchNumber')}
+                >
+                  -
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleIncrement('matchNumber')}
+                >
+                  +
+                </button>
+              </div>
+            </div>
+
+            {/* Driver Station */}
+<div className="form-group">
+  <label>Driver Station:</label>
+  <select
+    name="Driver Station"
+    value={matchData.driverStation}
+    onChange={handleChange}
+    required
+  >
+    <option value="">Select Team</option>
+    <option value="Red 1">Red 1</option>
+    <option value="Red 2">Red 2</option>
+    <option value="Red 3">Red 3</option>
+    <option value="Blue 1">Blue 1</option>
+    <option value="Blue 2">Blue 2</option>
+    <option value="Blue 3">Blue 3</option>
+  </select>
+</div>
+
+
             {/* Team Number */}
             <div className="form-group">
               <label>Team Number:</label>
@@ -133,18 +179,6 @@ const Scouting = () => {
                 type="number"
                 name="teamNumber"
                 value={matchData.teamNumber}
-                onChange={handleChange}
-                required
-              />
-            </div>
-
-            {/* Match Number */}
-            <div className="form-group">
-              <label>Match Number:</label>
-              <input
-                type="text"
-                name="matchNumber"
-                value={matchData.matchNumber}
                 onChange={handleChange}
                 required
               />
