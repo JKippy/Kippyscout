@@ -22,3 +22,16 @@ Code should only be built and deployed to the production Firebase project after 
 2. If your emulator doesn't work, run `firebase init firestore` to make sure you have Firestore installed on your device.
 3. If you get a Java error, install Java JDK 17.
 4. This emulator will allow you to test the database/auth/storage functions of the app without having to deploy to the production app.
+
+## Intro to Web Dev with React
+### for people who haven't done any of this before:
+1. React is a library for building user interfaces with javascript.
+2. You can think of `.js` files being "function" and `.css` files being "form."
+  - If you want your page to perform a certain action, you would code that in the `.js` file.
+  - If you want your page to look a certain way, you usse the `.css` file for that.
+3. In this project, you really only need to work in the `src` folder.
+  - In the `src` folder, there are sub folders for pages, components, and assets.
+      - Pages holds all the pages
+      - Components holds everything that mauy be resued across pages e.g., the side bar or login/logout buttons.
+      - Assets are where we store pictures or other media.
+4. App.js is the main file that defines the structure of the app. If you would want to add a new page, you would define it as a "route" in this file.
