@@ -1,43 +1,176 @@
-.scouting-container {
-  max-width: 800px;
-  margin: 20px auto;
-  padding: 20px;
-  border: 1px solid #ccc;
-  border-radius: 8px;
+/* Dashboard Container */
+.dashboard {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 30px;
+  font-family: 'Roboto', sans-serif;
   background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 6px 15px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
-.alliance-section {
-  margin-top: 20px; /* Space between sections */
+.dashboard:hover {
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
 }
 
-.alliance-container {
+/* Heading */
+.dashboard h2 {
+  text-align: center;
+  color: #333;
+  font-size: 2.5rem;
+  margin-bottom: 25px;
+  letter-spacing: 1px;
+}
+
+/* Event Code Input */
+.dashboard input {
+  padding: 12px;
+  width: 60%;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  font-size: 16px;
+  margin-right: 10px;
+  transition: border-color 0.3s ease;
+}
+
+.dashboard input:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+.dashboard button {
+  padding: 12px 20px;
+  font-size: 16px;
+  border: none;
+  background-color: #007BFF;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.dashboard button:hover {
+  background-color: #0056b3;
+}
+
+/* Form Group */
+.dashboard label {
+  display: block;
+  margin-bottom: 10px;
+  font-weight: bold;
+  color: #555;
+}
+
+.dashboard .match-select {
+  margin-top: 25px;
+}
+
+.dashboard select {
+  width: 100%;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 16px;
+  background-color: white;
+  transition: border-color 0.3s ease;
+}
+
+.dashboard select:focus {
+  border-color: #007BFF;
+  outline: none;
+}
+
+/* Error Message */
+.dashboard p {
+  text-align: center;
+  color: #ff4d4d;
+  font-weight: bold;
+  margin-top: 15px;
+  font-size: 1.1rem;
+}
+
+/* Match Details */
+.match-details {
+  margin-top: 40px;
+  padding: 30px;
+  background-color: #f1f3f5;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.match-details h3 {
+  font-size: 1.8rem;
+  color: #333;
+  margin-bottom: 20px;
+  font-weight: 600;
+}
+
+.match-details ul {
+  list-style-type: none;
+  padding-left: 0;
+}
+
+.match-details li {
+  font-size: 1.1rem;
+  color: #333;
   margin: 10px 0;
-  padding: 15px;
-  border-radius: 8px;
+  line-height: 1.6;
 }
 
-.red-alliance {
-  background-color: rgba(255, 0, 0, 0.1); /* Light red tint */
+.match-details h4 {
+  font-size: 1.3rem;
+  color: #444;
+  margin-top: 20px;
 }
 
-.blue-alliance {
-  background-color: rgba(0, 0, 255, 0.1); /* Light blue tint */
+/* Red and Blue Alliances Styling */
+.match-details ul li span {
+  font-weight: bold;
 }
 
-.robots-container {
-  display: flex;
-  justify-content: space-around; /* Distribute teams horizontally */
-  flex-wrap: wrap; /* Allow wrapping if space is insufficient */
+.match-details ul li span.team-number {
+  color: #007BFF;
 }
 
-.robot-card {
-  background-color: #fff;
-  border: 1px solid #ccc;
-  border-radius: 4px;
-  padding: 10px;
-  margin: 5px;
-  flex: 1 1 calc(30% - 10px); /* Adjust size of each card */
-  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+.match-details ul li span.team-goals {
+  color: #28a745;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .dashboard {
+    padding: 20px;
+  }
+
+  .dashboard input {
+    width: 75%;
+  }
+
+  .dashboard button {
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .dashboard select {
+    width: 100%;
+  }
+
+  .match-details {
+    padding: 20px;
+  }
+
+  .match-details h3 {
+    font-size: 1.5rem;
+  }
+
+  .match-details p,
+  .match-details li {
+    font-size: 0.95rem;
+  }
+
+  .match-details h4 {
+    font-size: 1.1rem;
+  }
 }
 

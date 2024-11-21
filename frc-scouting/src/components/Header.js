@@ -1,38 +1,53 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import LoginButton from './LoginButton';
-import LogoutButton from './LogoutButton';
-import { useAuth0 } from '@auth0/auth0-react';
-import { useSidebar } from '../SidebarContext'; // Import the useSidebar hook
-import './Header.css'; // Ensure the correct CSS file is imported
-import hamburgerIcon from '../assets/hamburger-icon.png'; // Update with your image path
+import AuthButton from './AuthButton';
+import './Header.css';
 
-const Header = () => {
-  const { isAuthenticated } = useAuth0();
-  const { isOpen, toggleSidebar } = useSidebar(); // Use context state
+const Header = ({ user }) => {
+  const [isOpen, setIsOpen] = useState(false); // State to manage sidebar toggle
+
+  const toggleSidebar = () => {
+    setIsOpen(!isOpen);
+  };
+
+  const closeSidebar = () => {
+    setIsOpen(false);
+  };
 
   return (
-    <div className={`sidebar ${isOpen ? 'open' : 'closed'}`}>
-      <button className="toggle-button" onClick={toggleSidebar}>
-        <img src={hamburgerIcon} alt="Menu" />
+    <div className="sidebar-container">
+      {/* Button to open and close the sidebar */}
+      <button className="sidebar-toggle" onClick={toggleSidebar}>
+        {isOpen ? 'Close' : 'Open'} Menu
       </button>
-      {isOpen && ( // Only render nav and auth buttons if sidebar is open
-        <>
-          <nav className="nav-menu">
-            <Link to="/">Home</Link>
-            <Link to="/scouting">Scouting</Link>
-            <Link to="/matches">Matches</Link>
-            <Link to="/dashboard">Drive Team Dashboard</Link>
-            <Link to="/about">About</Link>
-          </nav>
-          <div className="auth-buttons">
-            {isAuthenticated ? <LogoutButton /> : <LoginButton />}
-          </div>
-        </>
-      )}
+
+      {/* Sidebar menu */}
+      <div className={`sidebar ${isOpen ? 'open' : ''}`}>
+        <nav className="nav-menu">
+          <Link to="/" onClick={closeSidebar}>Home</Link>
+          <Link to="/scouting" onClick={closeSidebar}>Scouting</Link>
+          <Link to="/eventdata" onClick={closeSidebar}>Event Data</Link>
+          <Link to="/teamdata" onClick={closeSidebar}>Team Data</Link>
+          <Link to="/dashboard" onClick={closeSidebar}>Drive Team Dashboard</Link>
+          <Link to="/about" onClick={closeSidebar}>About</Link>
+          <Link to="/settings" onClick={closeSidebar}>Settings</Link>
+
+          {/* Conditional Rendering based on user authentication */}
+          {user ? (
+            <div>
+              <span>Welcome, {user.email}</span> {/* Display username or email */}
+              <AuthButton user={user} />
+            </div>
+          ) : (
+            <AuthButton user={user} />
+          )}
+        </nav>
+      </div>
+
+      {/* Optional: Clicking outside the sidebar to close it */}
+      {isOpen && <div className="overlay" onClick={closeSidebar}></div>}
     </div>
   );
 };
 
 export default Header;
-
