@@ -3,11 +3,12 @@ import axios from 'axios'; // To make API requests
 import { useEventCode } from '../components/EventCodeContext'; // Import the custom hook
 import { db } from '../firebase'; // Assuming you have Firebase initialized and exported as 'db'
 import { collection, getDocs } from 'firebase/firestore'; // Import modular Firebase methods
+import './Dashboard.css'; // Ensure the CSS is imported
 
 const Dashboard = () => {
   // Access eventCode and updateEventCode from the context
-  const { eventCode, updateEventCode } = useEventCode();
-  
+  const { eventCode, updateEventCode } = useEventCode(); // This will now work
+
   const [matches, setMatches] = useState([]);
   const [selectedMatch, setSelectedMatch] = useState('');
   const [loading, setLoading] = useState(false);
@@ -94,7 +95,7 @@ const Dashboard = () => {
   // Handle event code change
   const handleEventCodeChange = (e) => {
     const newEventCode = e.target.value;
-    updateEventCode(newEventCode); // Update eventCode in context
+    updateEventCode(newEventCode); // Now works, update eventCode in context
   };
 
   // Handle match selection
