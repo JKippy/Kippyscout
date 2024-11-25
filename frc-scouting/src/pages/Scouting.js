@@ -211,7 +211,7 @@ const Scouting = () => {
                 onChange={handleChange}
                 required
               >
-                <option value="">Select Team</option>
+                <option value="">Driver Station</option>
                 <option value="Red1">Red 1</option>
                 <option value="Red2">Red 2</option>
                 <option value="Red3">Red 3</option>
