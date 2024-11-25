@@ -7,7 +7,7 @@ import { getStorage } from "firebase/storage"; // Import Storage
 // Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyBPCI9ALGWqWjlv7s28VtkP-RHx7qP-xA0",
+  apiKey: {apiKey},
   authDomain: "kippyscout.firebaseapp.com",
   projectId: "kippyscout",
   storageBucket: "kippyscout.appspot.com",
